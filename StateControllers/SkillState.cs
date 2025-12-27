@@ -39,5 +39,36 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
+        public float StrengthWeightBuff
+        {
+            get
+            {
+                return _player.Skills.StrengthBuffLiftWeightInc.Value;
+            }
+        }
+
+        public float ReloadSkillMulti
+        {
+            get
+            {
+                return WeaponSkillBuffs.ReloadSpeed;
+            }
+        }
+
+        public float FixSkillMulti
+        {
+            get
+            {
+                return WeaponSkillBuffs.FixSpeed;
+            }
+        }
+
+        public float WeaponSkillErgo
+        {
+            get
+            {
+                return WeaponSkillBuffs.DeltaErgonomics;
+            }
+        }
     }
 }

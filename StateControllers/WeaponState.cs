@@ -28,6 +28,7 @@ namespace RealismCommonLib.StateControllers
 
         //class
         private bool _isPistol;
+        private bool _isShotgun;
         private bool _treatAsPistol; //is pistol class, or related, and does not have stock     
 
         public Weapon Weapon
@@ -81,6 +82,18 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
+        public bool IsShotgun
+        {
+            get
+            {
+                return _isShotgun;
+            }
+            private set
+            {
+                _isShotgun = value;
+            }
+        }
+
         public bool TreatAsPistol
         {
             get
@@ -104,11 +117,33 @@ namespace RealismCommonLib.StateControllers
 
         public bool WeaponCanFSADS { get; set; } = false;
 
+        public float TotalAimStabilityModi { get; set; } = 1f;
+
         public float TotalWeaponHandlingModi { get; set; } = 1f;
 
         public float BaseMeleeDamage { get; set; } = 0f;
 
         public float BaseMeleePen { get; set; } = 0f;
+
+        //this should only return BSG aim speed if attahcment overhaul is not present, but should still be factored by health state
+        //it needs to factor adrenaline, stamina, injury, weapon stats, weapon sight, etc. as calculated previously
+        public float TotalFinalAimSpeed 
+        {
+            get
+            {
+                return _player.ProceduralWeaponAnimation.AimingSpeed;
+            }
+        }
+
+        //this should be just the base weapon aim speed based on ergonomics, not health state or weapon sight
+        //this was calculated differnetly by attachment overhaul, stance speed was balanced around it. If attachment overhaul is present, should set this.
+        public float BaseAimSpeed
+        {
+            get
+            {
+                return _player.ProceduralWeaponAnimation.AimingSpeed;
+            }
+        }
 
         public bool HasShoulderContact
         {
@@ -171,6 +206,7 @@ namespace RealismCommonLib.StateControllers
         public void SetWeaponStateOnAwake() 
         {
             _isPistol = Weapon.WeapClass.ToLower() == "pistol";
+            _isShotgun = Weapon.WeapClass.ToLower() == "shotgun";
         }
 
         void Awake() 

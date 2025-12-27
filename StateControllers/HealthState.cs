@@ -10,18 +10,18 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using UnityEngine;
-using EffectClass = EFT.HealthSystem.ActiveHealthController.GClass2813; //DisplayableVariations, OverallDuration, Existing
-using ContusionInterface = GInterface326;
-using DehydrationInterface = GInterface317;
-using ExhaustionInterface = GInterface318;
-using FractureInterface = GInterface316;
-using HeavyBleedingInterface = GInterface314;
-using IntoxicationInterface = GInterface320;
-using LethalToxinInterface = GInterface321;
-using LightBleedingInterface = GInterface313;
-using PainKillerInterface = GInterface332;
-using TremorInterface = GInterface335;
-using TunnelVisionInterface = GInterface337;
+using EffectClass = EFT.HealthSystem.ActiveHealthController.GClass3008; //DisplayableVariations, OverallDuration, Existing
+using ContusionInterface = GInterface352;
+using DehydrationInterface = GInterface343;
+using ExhaustionInterface = GInterface344;
+using FractureInterface = GInterface342;
+using HeavyBleedingInterface = GInterface340;
+using IntoxicationInterface = GInterface346;
+using LethalToxinInterface = GInterface347;
+using LightBleedingInterface = GInterface339;
+using PainKillerInterface = GInterface358;
+using TremorInterface = GInterface361;
+using TunnelVisionInterface = GInterface363;
 
 namespace RealismCommonLib.StateControllers
 {
@@ -86,7 +86,7 @@ namespace RealismCommonLib.StateControllers
 
         public bool HasFracturedArmLeft { get; private set; } = false;
 
-       public bool HasFracturedArmRight { get; private set; } = false;
+        public bool HasFracturedArmRight { get; private set; } = false;
 
         public bool HasFracturedArm
         {
@@ -124,6 +124,10 @@ namespace RealismCommonLib.StateControllers
         public bool HasOverdosed { get; set; } = false;
 
         public bool IsPoisoned { get; set; } = false;
+
+        public float HealthStamRegenFactor { get; set; } = 1f;
+
+        public float StanceInjuryMulti  { get; set; } = 1f;
 
         void Update() 
         {
@@ -180,7 +184,5 @@ namespace RealismCommonLib.StateControllers
             }
             return false;
         }
-
-
     }
 }

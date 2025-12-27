@@ -16,7 +16,7 @@ using UnityEngine.Networking;
 
 namespace RealismCommonLib
 {
-    [BepInPlugin("com.fontaine.commonlib", "Fontaine-CommonLib", "1.0.0")]
+    [BepInPlugin("com.fontaine.commonlib", "Realism-CommonLib", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         //common lib's state and controller instances
@@ -29,6 +29,7 @@ namespace RealismCommonLib
         public static FiringState FiringStateInstance;
         public static RealismAudioController AudioControllerInstance;
         public static SkillState SkillStateInstance;
+        public static ReloadState ReloadStateInstance;
 
         //Mod detection
         public static bool AttachmentOverhaulEnabled = false;
@@ -38,6 +39,7 @@ namespace RealismCommonLib
         public static bool BallisticsOverhaulEnabled = false;
         public static bool FOVFixEnabled = false;
         public static bool GearOverhaulIsEnabled = false;
+        public static bool FikaIsPresent = false;
 
         //FPS
         private const float FPS_BASELINE = 144f;
@@ -45,10 +47,11 @@ namespace RealismCommonLib
         public static float FPSFactor = 1f;
         private static float _averageFPS = 0f;
 
-        public static ManualLogSource Logger;
+        public static ManualLogSource ModLogger;
 
         void Awake()
         {
+            ModLogger = Logger;
         }
 
         void Update()

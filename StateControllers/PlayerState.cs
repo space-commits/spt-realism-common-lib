@@ -2,9 +2,12 @@
 using EFT;
 using EFT.Animations;
 using EFT.InventoryLogic;
+using RealismCommonLib.Utils;
 using SPT.Reflection.Patching;
+using System.Numerics;
 using System.Reflection;
 using UnityEngine;
+using static EFT.Player;
 using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.StateControllers
@@ -26,12 +29,32 @@ namespace RealismCommonLib.StateControllers
     public class PlayerState: MonoBehaviour
     {
         private Player _player;
-
         private bool _isScav;
+
+        private TimeInterval _staminaCalcTimer = new TimeInterval(1f);
 
         public Player Player
         {
-            get { return _player; }
+            get
+            {
+                return _player; 
+            }
+        }
+
+        public Player.FirearmController FirearmController
+        {
+            get
+            { 
+                return Player.HandsController as FirearmController;
+            }
+        }
+
+        public ProceduralWeaponAnimation ProceduralWeaponAnimation
+        {
+            get
+            {
+                return Player.ProceduralWeaponAnimation;
+            }
         }
 
         public bool IsMoving 
@@ -66,7 +89,7 @@ namespace RealismCommonLib.StateControllers
         {
             get 
             {
-                return _player.MovementContext.CurrentState.Name != EPlugin.PlayerStateInstance.Stationary;
+                return _player.MovementContext.StationaryWeapon == null;
             }
         }
 
@@ -96,7 +119,7 @@ namespace RealismCommonLib.StateControllers
         //renamed it to reflect above, in future create dedicated property that factors comfort
         public float TotalWeight { get; private set; }
 
-        //this is a config option, probably should be from movement overhaul
+        //this is a config option, probably should be from movement or gear overhaul
         //probably has a server component, setting gear mouse penalties to 0 as it's basd on weight
         //may be a redundant feature if doing dead zone instead
         public bool EnableMouseSensPenalty { get; private set; }
@@ -108,7 +131,7 @@ namespace RealismCommonLib.StateControllers
 
         void Update() 
         {
-            CalcStaminaFactors(_player);
+           if (_staminaCalcTimer.Ready()) CalcStaminaFactors();
         }
 
         /// <summary>
@@ -119,10 +142,10 @@ namespace RealismCommonLib.StateControllers
             _player.ProceduralWeaponAnimation.method_23();
         }
 
-        private void CalcStaminaFactors(Player player)
+        private void CalcStaminaFactors()
         {
-            float remainArmStamPercent = Mathf.Min((player.Physical.HandsStamina.Current / player.Physical.HandsStamina.TotalCapacity) * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
-            BaseStaminaPerc = player.Physical.Stamina.Current / player.Physical.Stamina.TotalCapacity;
+            float remainArmStamPercent = Mathf.Min((_player.Physical.HandsStamina.Current / _player.Physical.HandsStamina.TotalCapacity) * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
+            BaseStaminaPerc = _player.Physical.Stamina.Current / _player.Physical.Stamina.TotalCapacity;
 
             RemainingArmStamFactor = Mathf.Pow(remainArmStamPercent, PlayerConsts.REMAINING_ARM_STAM_FACTOR);
             RemainingArmStamReloadFactor = Mathf.Clamp(Mathf.Pow(remainArmStamPercent, PlayerConsts.REMAINING_ARM_STAM_RELOAD_FACTOR), PlayerConsts.REMAINING_ARM_STAM_RELOAD_FACTOR_MIN, 1f);
@@ -137,52 +160,18 @@ namespace RealismCommonLib.StateControllers
             var weapon = player?.HandsController != null && player?.HandsController?.Item != null ? player.HandsController.Item as Weapon : null;
             float weaponWeight = weapon != null ? weapon.TotalWeight : 0f;
             TotalWeightMinusWeapon = playerWeight - weaponWeight;
-            TotalMousePenalty = (-playerWeight / 10f);
+            //TotalMousePenalty = (-playerWeight / 10f);
             TotalWeight = playerWeight;
 
-            if (EnableMouseSensPenalty)
+            //This should be part of gear or movement overhaul mods
+/*            if (EnableMouseSensPenalty)
             {
                 player.RemoveMouseSensitivityModifier(Player.EMouseSensitivityModifier.Armor);
                 if (TotalMousePenalty < 0f)
                 {
-                    player.AddMouseSensitivityModifier(Player.EMouseSensitivityModifier.Armor, PlayerStatus.TotalMousePenalty / 100f);
+                    player.AddMouseSensitivityModifier(Player.EMouseSensitivityModifier.Armor, TotalMousePenalty / 100f);
                 }
-            }
-        }
-    }
-
-    public class OnItemAddedOrRemovedPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(Player).GetMethod("OnItemAddedOrRemoved", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPostfix]
-        private static void PatchPostfix(Player __instance)
-        {
-
-            if (__instance.IsYourPlayer)
-            {
-                PlayerStateInstance.CalcPlayerWeightStats(__instance);
-            }
-        }
-    }
-
-    public class PlayerInitPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(Player).GetMethod("Init", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPostfix]
-        private static void PatchPostfix(Player __instance)
-        {
-            if (__instance.IsYourPlayer)
-            {
-                PlayerStateInstance.CalcPlayerWeightStats(__instance);
-            }
+            }*/
         }
     }
 }

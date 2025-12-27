@@ -15,6 +15,6 @@ namespace RealismCommonLib.StateControllers
 
         public float TotalRadiation { get; set; } = 0f;
 
-        public bool IsCoughingInGas { get; set; } = 0f;
+        public bool IsCoughingInGas { get; set; } = false;
     }
 }
