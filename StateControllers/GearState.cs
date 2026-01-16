@@ -11,7 +11,6 @@ namespace RealismCommonLib.StateControllers
 {
     public class GearState: MonoBehaviour
     {
-        public Player _player;
 
         public bool HasGasMask { get;  private set; }
 
@@ -32,15 +31,16 @@ namespace RealismCommonLib.StateControllers
 
         public void CheckGear()
         {
-            FaceShieldComponent fsComponent = _player.FaceShieldObserver.Component;
-            NightVisionComponent nvgComponent = _player.NightVisionObserver.Component;
-            ThermalVisionComponent thermComponent = _player.ThermalVisionObserver.Component;
+            Player player = Plugin.PlayerStateInstance.Player;
+            FaceShieldComponent fsComponent = player.FaceShieldObserver.Component;
+            NightVisionComponent nvgComponent = player.NightVisionObserver.Component;
+            ThermalVisionComponent thermComponent = player.ThermalVisionObserver.Component;
 
             FaceShieldIsActive = fsComponent != null && (fsComponent.Togglable == null || fsComponent.Togglable.On);
             NVGIsActive = nvgComponent != null && (nvgComponent.Togglable == null || nvgComponent.Togglable.On);
             ThermalIsActive = thermComponent != null && (thermComponent.Togglable == null || thermComponent.Togglable.On);
             FaceShieldCouldBlockADS = FaceShieldIsActive;
-            NVGsCouldBlockADS =  (NVGIsActive && _player.ProceduralWeaponAnimation.CurrentScope.IsOptic) || ThermalIsActive;
+            NVGsCouldBlockADS =  (NVGIsActive && player.ProceduralWeaponAnimation.CurrentScope.IsOptic) || ThermalIsActive;
         }
     }
 }

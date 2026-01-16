@@ -4,16 +4,14 @@ using EFT.Animations;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.Utils;
+using System.Numerics;
 using UnityEngine;
-
+using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.StateControllers
 {
-    public class ReloadState
+    public class ReloadState: MonoBehaviour
     {
-        private Player _player;
-        private Player.FirearmController _fc;
-
         private TimeInterval _reloadCheckTimer = new TimeInterval(0.1f);
 
         public bool ReloadAnimationSupportsActiveAim
@@ -47,17 +45,24 @@ namespace RealismCommonLib.StateControllers
             if (_reloadCheckTimer.Ready()) ReloadStateCheck();
         }
 
+        public void ResetReloadSpeed() 
+        {
+            PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(1f);
+        }
+
         public void ReloadStateCheck()
         {
-            IsInReloadOpertation = _fc.IsInReloadOperation();
+            IsInReloadOpertation = PlayerStateInstance.FirearmController.IsInReloadOperation();
 
             if (IsInReloadOpertation)
             {
                 if (IsAttemptingToReloadInternalMag)
                 {
+                    //handle stance reload bonuses here
+
                     if (PluginConfig.EnableReloadLogging.Value == true)
                     {
-                        Plugin.ModLogger.LogWarning("IsAttemptingToReloadInternalMag" );
+                        ModLogger.LogWarning("IsAttemptingToReloadInternalMag" );
                     }
                 }
             }

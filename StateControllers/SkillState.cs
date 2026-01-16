@@ -3,6 +3,7 @@ using EFT;
 using EFT.Animations;
 using System.Numerics;
 using UnityEngine;
+using static RealismCommonLib.Plugin;
 using WeaponSkills = EFT.SkillManager.GClass2250;
 
 namespace RealismCommonLib.StateControllers
@@ -10,15 +11,12 @@ namespace RealismCommonLib.StateControllers
     public class SkillState: MonoBehaviour
     {
 
-        Player _player;
-
-        Player.FirearmController _fc;
 
         public WeaponSkills WeaponSkillBuffs 
         { 
             get
             {
-                return _player.Skills.GetWeaponInfo(_fc.Item);
+                return PlayerStateInstance.Player.Skills.GetWeaponInfo(WeaponStateInstance.Weapon);
             }
         
         }
@@ -35,7 +33,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _player.Skills.StrengthBuffAimFatigue.Value;
+                return PlayerStateInstance.Player.Skills.StrengthBuffAimFatigue.Value;
             }
         }
 
@@ -43,7 +41,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _player.Skills.StrengthBuffLiftWeightInc.Value;
+                return PlayerStateInstance.Player.Skills.StrengthBuffLiftWeightInc.Value;
             }
         }
 

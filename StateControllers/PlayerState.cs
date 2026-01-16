@@ -39,6 +39,10 @@ namespace RealismCommonLib.StateControllers
             {
                 return _player; 
             }
+            internal set 
+            {
+                _player = value;
+            }
         }
 
         public Player.FirearmController FirearmController
@@ -127,6 +131,7 @@ namespace RealismCommonLib.StateControllers
         void Awake() 
         {
             IsScav = Singleton<GameWorld>.Instance?.MainPlayer?.Profile?.Info?.Side == EPlayerSide.Savage;
+            CalcPlayerWeightStats();
         }
 
         void Update() 
@@ -153,11 +158,11 @@ namespace RealismCommonLib.StateControllers
             CombinedStaminaFactor = Mathf.Pow(remainArmStamPercent * BaseStaminaPerc, PlayerConsts.COMBINED_STAMINA_FACTOR);
         }
 
-        public void CalcPlayerWeightStats(Player player)
+        public void CalcPlayerWeightStats()
         {
-            player.Inventory.UpdateTotalWeight();
-            float playerWeight = player.Inventory.TotalWeight;
-            var weapon = player?.HandsController != null && player?.HandsController?.Item != null ? player.HandsController.Item as Weapon : null;
+            _player.Inventory.UpdateTotalWeight();
+            float playerWeight = _player.Inventory.TotalWeight;
+            var weapon = _player?.HandsController != null && _player?.HandsController?.Item != null ? _player.HandsController.Item as Weapon : null;
             float weaponWeight = weapon != null ? weapon.TotalWeight : 0f;
             TotalWeightMinusWeapon = playerWeight - weaponWeight;
             //TotalMousePenalty = (-playerWeight / 10f);

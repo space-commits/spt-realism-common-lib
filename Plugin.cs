@@ -1,18 +1,9 @@
 ﻿using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using Comfort.Common;
-using EFT;
 using RealismCommonLib.Controllers;
 using RealismCommonLib.StateControllers;
-using SPT.Common;
-using SPT.Reflection;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+using RealismCommonLib.Patches;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace RealismCommonLib
 {
@@ -58,6 +49,30 @@ namespace RealismCommonLib
         {
             GetFps();
             FPSFactor = GetFPSFactor();
+        }
+
+        private void EnablePatches() 
+        {
+            //Shooting
+            new ShootPatch().Enable();
+
+            //Player
+            new OnItemAddedOrRemovedPatch().Enable();
+            new PlayerInitPatch().Enable();
+
+            //Reload
+            new SetAnimatorAndProceduralValuesPatch().Enable();
+            new CheckAmmoPatch().Enable();
+            new CheckChamberPatch().Enable();
+            new BoltActionReloadPatch().Enable();
+            new SetMalfRepairSpeedPatch().Enable();
+            new RechamberPatch().Enable();
+            new ReloadMagPatch().Enable();
+            new QuickReloadMagPatch().Enable();
+            new ReloadCylinderMagazinePatch().Enable();
+            new ReloadWithAmmoPatch().Enable();
+            new ReloadBarrelsPatch().Enable();
+            new OnMagInsertedPatch().Enable();
         }
 
         private void GetFps()

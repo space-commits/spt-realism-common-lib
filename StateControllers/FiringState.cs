@@ -7,14 +7,13 @@ using SPT.Reflection.Patching;
 using System.Numerics;
 using System.Reflection;
 using UnityEngine;
+using static RealismCommonLib.Plugin;
 using static EFT.Player;
 
 namespace RealismCommonLib.StateControllers
 {
     public class FiringState : MonoBehaviour
     {
-        private Player _player;
-        private Player.FirearmController _fc;
 
         private TimeGate _firingTimeGate = new TimeGate(PluginConfig.FiringResetDelay.Value);
         private TimeGate _firingDeafenTimeGate = new TimeGate(PluginConfig.FiringDeafenResetDelay.Value);
@@ -26,7 +25,8 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _fc != null && _fc.autoFireOn;
+                FirearmController fc = PlayerStateInstance.FirearmController;
+                return fc != null && fc.autoFireOn;
             }
         }
 

@@ -15,8 +15,6 @@ namespace RealismCommonLib.StateControllers
         private const float BASE_REALISM_ERGO_FACTOR = 80f;
 
         private Weapon _weapon;
-        private Player _player;
-        private Player.FirearmController _fc;
 
         //stats
         private float _ergoFactor;
@@ -105,7 +103,27 @@ namespace RealismCommonLib.StateControllers
         //Custom Stats (requires attachment overhaul or others)
         //Should this common lib pull data from the modules, or should the modules set these?
         //Having the lib do it means less code in the modules, but more coupling
+
         public bool IsMachinePistol { get; set; } = false;
+
+
+        public bool IsBoltAction
+        {
+            get
+            {
+                return _weapon.BoltAction;
+            }
+        }
+
+        //need to find a mod agnostic way to determine this
+        //if shotgunn and firemode is single should work
+        public bool IsManuallyOperated
+        {
+            get
+            {
+                return IsBoltAction || (IsShotgun && _weapon.SelectedFireMode == Weapon.EFireMode.single);
+            }
+        }
 
         public bool IsBullpup { get; set; } = false;
 

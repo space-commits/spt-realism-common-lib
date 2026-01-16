@@ -46,8 +46,7 @@ namespace RealismCommonLib.StateControllers
 
     public class HealthState: MonoBehaviour
     {
-        private Player _player;
-        private ActiveHealthController _activeHealthController;
+        internal ActiveHealthController _activeHealthController;
         private TimeInterval _baseTimeGate = new TimeInterval(5f);
 
         public List<EBodyPart> PossibleBodyParts = new List<EBodyPart>
