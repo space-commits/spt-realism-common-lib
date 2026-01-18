@@ -51,6 +51,9 @@ namespace RealismCommonLib.ModifierHandlers
         public static readonly FloatMultiplierSet MalfFixSpeed = new();
         public static readonly FloatMultiplierSet RechamberSpeed = new();
         public static readonly FloatMultiplierSet NoMagReloadSpeed = new();
+        public static readonly FloatMultiplierSet NewMagReloadSpeed = new();
+        public static readonly FloatMultiplierSet CurrentMagRemoveSpeed = new();
+        public static readonly FloatMultiplierSet InternalReloadModifier = new();
     }
 
 }
