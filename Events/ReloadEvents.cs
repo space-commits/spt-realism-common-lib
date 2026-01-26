@@ -21,7 +21,7 @@ namespace RealismCommonLib.Events
         /// <summary>
         /// Triggered on bolt/pump action usage.
         /// </summary>
-        public static event Action? BoltActionReload;
+        public static event Action? BoltActionPump;
 
         public static event Action? MalfFix;
 
@@ -34,6 +34,8 @@ namespace RealismCommonLib.Events
         public static event Action? NewMagInserted;
 
         public static event Action? CurrentMagRemoved;
+
+        public static event Action? InternalMagReload;
 
         private static void RaiseEvent(Action? eventHandler)
         {
@@ -52,7 +54,7 @@ namespace RealismCommonLib.Events
             }
         }
 
-        internal static void RaiseWeaponStateReset()
+        internal static void RaiseWeaponAnimationStateReset()
         {
             RaiseEvent(WeaponStateReset);
         }
@@ -67,14 +69,14 @@ namespace RealismCommonLib.Events
             RaiseEvent(CheckAmmo);
         }
 
-        internal static void RaiseBoltActionReload()
+        internal static void RaiseBoltActionPump()
         {
-            RaiseEvent(BoltActionReload);
+            RaiseEvent(BoltActionPump);
         }
 
         internal static void RaiseInternalReload()
         {
-            RaiseEvent(BoltActionReload);
+            RaiseEvent(InternalMagReload);
         }
 
         internal static void RaiseOnSetMalfFix()
@@ -105,6 +107,11 @@ namespace RealismCommonLib.Events
         internal static void RaiseOnNewMagInserted()
         {
             RaiseEvent(NewMagInserted);
+        }
+
+        internal static void RaiseOnInternalMagReload()
+        {
+            RaiseEvent(InternalMagReload);
         }
     }
 }

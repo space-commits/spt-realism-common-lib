@@ -31,7 +31,7 @@ namespace RealismCommonLib.Patches
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
             {
-                ReloadEvents.RaiseWeaponStateReset();
+                ReloadEvents.RaiseWeaponAnimationStateReset();
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("SetAnimatorAndProceduralValues");
             }
         }
@@ -120,7 +120,7 @@ namespace RealismCommonLib.Patches
             bool isUBGL = __instance.Item.IsUnderBarrelDeviceActive || __instance.Item.IsGrenadeLauncher;
             if (WeaponStateInstance.IsManuallyOperated || (isUBGL))
             {
-                ReloadEvents.RaiseBoltActionReload();
+                ReloadEvents.RaiseBoltActionPump();
 
                 float config =
                     WeaponStateInstance.IsShotgun ? PluginConfig.GlobalCheckChamberShotgunSpeedMulti.Value :
@@ -390,6 +390,8 @@ namespace RealismCommonLib.Patches
                 ReloadStateInstance.IsAttemptingToReloadInternalMag = true;
                 ReloadStateInstance.IsAttemptingRevolverReload = true;
 
+                ReloadEvents.RaiseOnInternalMagReload();
+
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===ReloadCylinderMagazine===");
             }
         }
@@ -412,6 +414,8 @@ namespace RealismCommonLib.Patches
             if (player.IsYourPlayer == true)
             {
                 ReloadStateInstance.IsAttemptingToReloadInternalMag = true;
+
+                ReloadEvents.RaiseOnInternalMagReload();
 
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===ReloadWithAmmo===");
             }

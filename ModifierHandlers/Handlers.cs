@@ -6,7 +6,7 @@ namespace RealismCommonLib.ModifierHandlers
 {
     public sealed class FloatMultiplierHandle
     {
-        internal float Multiplier;
+        public float Multiplier;
     }
 
     public sealed class FloatMultiplierSet
