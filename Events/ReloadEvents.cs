@@ -37,81 +37,64 @@ namespace RealismCommonLib.Events
 
         public static event Action? InternalMagReload;
 
-        private static void RaiseEvent(Action? eventHandler)
-        {
-            if (eventHandler == null) return;
-
-            foreach (Action handler in eventHandler.GetInvocationList())
-            {
-                try
-                {
-                    handler();
-                }
-                catch (Exception ex)
-                {
-                    Plugin.ModLogger.LogError($"Error invoking {nameof(eventHandler)}: {ex}");
-                }
-            }
-        }
-
         internal static void RaiseWeaponAnimationStateReset()
         {
-            RaiseEvent(WeaponStateReset);
+            BaseEventHandler.RaiseEvent(WeaponStateReset);
         }
 
         internal static void RaiseChamberCheck()
         {
-            RaiseEvent(ChamberCheck);
+            BaseEventHandler.RaiseEvent(ChamberCheck);
         }
 
         internal static void RaiseCheckAmmo()
         {
-            RaiseEvent(CheckAmmo);
+            BaseEventHandler.RaiseEvent(CheckAmmo);
         }
 
         internal static void RaiseBoltActionPump()
         {
-            RaiseEvent(BoltActionPump);
+            BaseEventHandler.RaiseEvent(BoltActionPump);
         }
 
         internal static void RaiseInternalReload()
         {
-            RaiseEvent(InternalMagReload);
+            BaseEventHandler.RaiseEvent(InternalMagReload);
         }
 
         internal static void RaiseOnSetMalfFix()
         {
-            RaiseEvent(MalfFix);
+            BaseEventHandler.RaiseEvent(MalfFix);
         }
 
         internal static void RaiseOnRechamber()
         {
-            RaiseEvent(Rechamber);
+            BaseEventHandler.RaiseEvent(Rechamber);
         }
 
         internal static void RaiseOnMagReload()
         {
-            RaiseEvent(MagReload);
+            BaseEventHandler.RaiseEvent(MagReload);
         }
 
         internal static void RaiseOnQuickMagReload()
         {
-            RaiseEvent(QuickMagReload);
+            BaseEventHandler.RaiseEvent(QuickMagReload);
         }
 
         internal static void RaiseOnCurrentMagRemoved()
         {
-            RaiseEvent(CurrentMagRemoved);
+            BaseEventHandler.RaiseEvent(CurrentMagRemoved);
         }
 
         internal static void RaiseOnNewMagInserted()
         {
-            RaiseEvent(NewMagInserted);
+            BaseEventHandler.RaiseEvent(NewMagInserted);
         }
 
         internal static void RaiseOnInternalMagReload()
         {
-            RaiseEvent(InternalMagReload);
+            BaseEventHandler.RaiseEvent(InternalMagReload);
         }
     }
 }

@@ -7,9 +7,13 @@ using UnityEngine;
 
 namespace RealismCommonLib
 {
-    [BepInPlugin("com.fontaine.commonlib", "Realism-CommonLib", "1.0.0")]
+    [BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
+        public const string MOD_GUID = "com.fontaine.realismCommonlib";
+        public const string MOD_NAME = "Realism-CommonLib";
+        public const string MOD_VERSION = "1.0.0";
+
         //common lib's state and controller instances
         public static GameState GameStateInstance;
         public static PlayerState PlayerStateInstance;

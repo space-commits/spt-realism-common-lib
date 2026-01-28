@@ -6,14 +6,25 @@ using System.Text;
 
 namespace RealismCommonLib.PatchPipeline
 {
-    public sealed class InputContext
+    public class InputContext
     {
         public ECommand Command;
+
+        public InputContext(ECommand command)
+        {
+            Command = command;
+        }   
     }
 
     public static class Pipelines
     {
-        public static readonly PatchPipeline<InputContext> InputPipeline =
-            new PatchPipeline<InputContext>();
+        // 1) Cancel pipelines
+        public static readonly PatchVetoPipeline<InputContext> InputVetoPipeline = new();
+
+        // 3) Override pipelines
+        public static readonly PatchOveridePipeline<InputContext> InputOverridePipeline = new();
+
+        // 4) Override behavior handlers
+        public static readonly PatchOverrideHandler<InputContext> InputOverrideHandler = new();
     }
 }
