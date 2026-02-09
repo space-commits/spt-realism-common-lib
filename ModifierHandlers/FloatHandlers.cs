@@ -42,7 +42,7 @@ namespace RealismCommonLib.ModifierHandlers
 
     public static class StatModifiers
     {
-        public static readonly FloatMultiplierSet AllReloadSpeeds = new();
+        //Reloads
         public static readonly FloatMultiplierSet MagReloadSpeed = new();
         public static readonly FloatMultiplierSet QuickMagReloadSpeed = new();
         public static readonly FloatMultiplierSet CheckAmmoSpeed = new();
@@ -54,6 +54,12 @@ namespace RealismCommonLib.ModifierHandlers
         public static readonly FloatMultiplierSet NewMagReloadSpeed = new();
         public static readonly FloatMultiplierSet CurrentMagRemoveSpeed = new();
         public static readonly FloatMultiplierSet InternalReloadModifier = new();
+
+        //Movement speed
+        public static readonly FloatMultiplierSet MaxWalkSpeedModifier = new();
+        public static readonly FloatMultiplierSet MaxSprintSpeedModifier = new();
+        public static readonly FloatMultiplierSet SprintAccelModifier = new();
+        public static readonly FloatMultiplierSet PreSprintAccelModifier = new();
     }
 
 }

@@ -2,8 +2,11 @@
 using EFT;
 using EFT.Animations;
 using EFT.InventoryLogic;
+using RealismCommonLib.Events;
 using RealismCommonLib.Utils;
 using SPT.Reflection.Patching;
+using System.Collections.Generic;
+using System;
 using System.Numerics;
 using System.Reflection;
 using UnityEngine;
@@ -113,8 +116,6 @@ namespace RealismCommonLib.StateControllers
 
         public float CombinedStaminaFactor { get; private set; }
 
-        public float TotalMousePenalty { get; private set; }
-
         //this is just set to current player total weight, so it assumes it's been modified elsewhere by comfort stat
         //renamed it to reflect above, in future create dedicated property that factors comfort
         public float TotalWeightMinusWeapon { get; private set; }
@@ -131,13 +132,24 @@ namespace RealismCommonLib.StateControllers
         void Awake() 
         {
             IsScav = Singleton<GameWorld>.Instance?.MainPlayer?.Profile?.Info?.Side == EPlayerSide.Savage;
+
+            //component will be initialized after events fired, so do initial calc here
             CalcPlayerWeightStats();
+
+            PlayerEvents.OnItemAddedOrRemoved += CalcPlayerWeightStats;
+            PlayerEvents.OnPlayerInit += CalcPlayerWeightStats;
         }
 
         void Update() 
         {
            if (_staminaCalcTimer.Ready()) CalcStaminaFactors();
         }
+
+        void onDestroy() 
+        {
+            PlayerEvents.OnItemAddedOrRemoved -= CalcPlayerWeightStats;
+            PlayerEvents.OnPlayerInit -= CalcPlayerWeightStats;
+        }   
 
         /// <summary>
         /// Resets the player's procedural weapon animation state, useful to reset sway.
@@ -158,25 +170,22 @@ namespace RealismCommonLib.StateControllers
             CombinedStaminaFactor = Mathf.Pow(remainArmStamPercent * BaseStaminaPerc, PlayerConsts.COMBINED_STAMINA_FACTOR);
         }
 
-        public void CalcPlayerWeightStats()
+        private void CalcPlayerWeightStats()
         {
             _player.Inventory.UpdateTotalWeight();
             float playerWeight = _player.Inventory.TotalWeight;
             var weapon = _player?.HandsController != null && _player?.HandsController?.Item != null ? _player.HandsController.Item as Weapon : null;
             float weaponWeight = weapon != null ? weapon.TotalWeight : 0f;
             TotalWeightMinusWeapon = playerWeight - weaponWeight;
-            //TotalMousePenalty = (-playerWeight / 10f);
             TotalWeight = playerWeight;
+        }
 
-            //This should be part of gear or movement overhaul mods
-/*            if (EnableMouseSensPenalty)
-            {
-                player.RemoveMouseSensitivityModifier(Player.EMouseSensitivityModifier.Armor);
-                if (TotalMousePenalty < 0f)
-                {
-                    player.AddMouseSensitivityModifier(Player.EMouseSensitivityModifier.Armor, TotalMousePenalty / 100f);
-                }
-            }*/
+        /// <summary>
+        /// Sets MovementContext.SpeedLimitIsDirty to true, which forces speed limit to update. Do not call in update.
+        /// </summary>
+        public void UpdateWalkSpeedLimits() 
+        {
+            Player.MovementContext.SpeedLimitIsDirty = true;
         }
     }
 }

@@ -25,6 +25,7 @@ namespace RealismCommonLib
         public static RealismAudioController AudioControllerInstance;
         public static SkillState SkillStateInstance;
         public static ReloadState ReloadStateInstance;
+        public static AimingState AimStateInstance;
 
         //Mod detection
         public static bool AttachmentOverhaulEnabled = false;

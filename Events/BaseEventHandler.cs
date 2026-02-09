@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RealismCommonLib.Events
 {
-    internal static class BaseEventHandler
+    public static class BaseEventHandler
     {
         public static void RaiseEvent(Action? eventHandler)
         {

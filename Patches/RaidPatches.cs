@@ -7,5 +7,5 @@ using static EFT.Player;
 
 namespace RealismCommonLib.Patches
 {
-    
+
 }

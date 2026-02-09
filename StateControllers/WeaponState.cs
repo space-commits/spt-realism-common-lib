@@ -6,6 +6,7 @@ using UnityEngine;
 using EFT.InventoryLogic;
 using EFT.Animations;
 using static EFT.Player;
+using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.StateControllers
 {
@@ -52,7 +53,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _fc != null && _fc.HasBipod && _fc.BipodState;
+                return PlayerStateInstance.FirearmController.HasBipod && PlayerStateInstance.FirearmController.BipodState;
             }
         }
 
@@ -97,6 +98,16 @@ namespace RealismCommonLib.StateControllers
             get
             {
                 return !HasShoulderContact &&  (IsMachinePistol || IsPistol);
+            }
+        }
+
+        public bool HasOptic
+        {
+            get
+            {
+                return 
+                    PlayerStateInstance.Player.ProceduralWeaponAnimation.CurrentScope != null && 
+                    PlayerStateInstance.Player.ProceduralWeaponAnimation.CurrentScope.IsOptic;
             }
         }
 
@@ -149,7 +160,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _player.ProceduralWeaponAnimation.AimingSpeed;
+                return PlayerStateInstance.Player.ProceduralWeaponAnimation.AimingSpeed;
             }
         }
 
@@ -159,7 +170,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _player.ProceduralWeaponAnimation.AimingSpeed;
+                return PlayerStateInstance.Player.ProceduralWeaponAnimation.AimingSpeed;
             }
         }
 
@@ -187,9 +198,10 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
+        //TODO: attachment overhaul needs a way to override
         public void CheckForShoulderContact()
         {
-            _hasShoulderContact = _player.ProceduralWeaponAnimation._shouldMoveWeaponCloser && IsPistol;
+            _hasShoulderContact = PlayerStateInstance.Player.ProceduralWeaponAnimation._shouldMoveWeaponCloser && !IsPistol;
         }
 
         public void UpdateErgoFactor() 
@@ -197,7 +209,7 @@ namespace RealismCommonLib.StateControllers
             _ergoFactor = Mathf.Clamp(BASE_REALISM_ERGO_FACTOR - TotalErgo, 1f, BASE_REALISM_ERGO_FACTOR);
         }
 
-        //this needs to be called in an appropriate method call hook like UpdateWeaponVariables or Method_23()
+        //TODO: this needs to be called in an appropriate method call hook like UpdateWeaponVariables or Method_23()
         /// <summary>
         /// When weapon state changes (reload, fold stock, change firemode etc), update relevant weapon state variables.
         /// Used for EFT weapon stats, not custom weapon stats.
@@ -205,7 +217,7 @@ namespace RealismCommonLib.StateControllers
         public void UpdateWeaponStateOnStateChange()
         {
             TotalWeaponWeight = _weapon.TotalWeight;
-            WeaponLength = _fc.Item.CalculateCellSize().X;
+            WeaponLength = PlayerStateInstance.FirearmController.Item.CalculateCellSize().X;
 
             if (!Plugin.AttachmentOverhaulEnabled) 
             {          

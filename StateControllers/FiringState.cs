@@ -1,20 +1,15 @@
-﻿using EFT;
-using EFT.Animations;
-using EFT.InventoryLogic;
+﻿using RealismCommonLib.Events;
 using RealismCommonLib.Utils;
-using HarmonyLib;
-using SPT.Reflection.Patching;
-using System.Numerics;
-using System.Reflection;
 using UnityEngine;
-using static RealismCommonLib.Plugin;
 using static EFT.Player;
+using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.StateControllers
 {
+
+
     public class FiringState : MonoBehaviour
     {
-
         private TimeGate _firingTimeGate = new TimeGate(PluginConfig.FiringResetDelay.Value);
         private TimeGate _firingDeafenTimeGate = new TimeGate(PluginConfig.FiringDeafenResetDelay.Value);
         private TimeGate _firingMovementTimeGate = new TimeGate(PluginConfig.FiringMovementResetDelay.Value);
@@ -25,8 +20,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                FirearmController fc = PlayerStateInstance.FirearmController;
-                return fc != null && fc.autoFireOn;
+                return PlayerStateInstance.FirearmController.autoFireOn;
             }
         }
 
@@ -75,12 +69,25 @@ namespace RealismCommonLib.StateControllers
 
         public float FiringDuration { get; private set; } = 0;
 
-        public void Update() 
+        void Awake() 
         {
+            InputEvents.ToggleGogglesInput += UpdateHipfireState;
+        }
 
+        void Update() 
+        {
             UpdateFiringState();
+        }
 
+        void OnDestroy() 
+        {
+            InputEvents.ToggleGogglesInput -= UpdateHipfireState;
+        }
 
+        //update hipfire to take NVG toggle into account
+        private void UpdateHipfireState() 
+        {
+            PlayerStateInstance.FirearmController.UpdateHipInaccuracy();
         }
 
         public void UpdateFiringState()
@@ -101,6 +108,8 @@ namespace RealismCommonLib.StateControllers
 
         public void SetFiringState()
         {
+            Events.PlayerEvents.RaiseOnShotFired();
+
             ShotCount++;
 
             _firingTimeGate.Reset();

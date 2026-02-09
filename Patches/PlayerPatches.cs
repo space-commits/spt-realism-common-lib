@@ -1,12 +1,11 @@
-﻿using EFT;
-using RealismCommonLib.StateControllers;
+﻿using Comfort.Common;
+using EFT;
+using HarmonyLib;
+using RealismCommonLib.Events;
+using RealismCommonLib.ModifierHandlers;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
-using RealismCommonLib.Controllers;
-using EFT.HealthSystem;
+
 
 namespace RealismCommonLib.Patches
 {
@@ -23,7 +22,7 @@ namespace RealismCommonLib.Patches
 
             if (__instance.IsYourPlayer)
             {
-               Plugin.PlayerStateInstance.CalcPlayerWeightStats();
+               PlayerEvents.RaiseOnItemAddedOrRemoved();
             }
         }
     }
@@ -40,31 +39,74 @@ namespace RealismCommonLib.Patches
         {
             if (__instance.IsYourPlayer)
             {
-
-
-                //method to add state controllers, or one component controller that manages others
-                Plugin.GameStateInstance = __instance.gameObject.AddComponent<GameState>(); //should be global and not player specific?
-                Plugin.AudioControllerInstance = __instance.gameObject.AddComponent<RealismAudioController>();  //should be global and not player specific?
-               
-                Plugin.PlayerStateInstance = __instance.gameObject.AddComponent<PlayerState>();
-                Plugin.PlayerStateInstance.Player = __instance;
-
-                //weapon state instance needs to update on weapon swap or if player unequps weapon...
-                Plugin.WeaponStateInstance = __instance.gameObject.AddComponent<WeaponState>();
-
-                Plugin.HealthStateInstance = __instance.gameObject.AddComponent<HealthState>();
-                Plugin.HealthStateInstance._activeHealthController = __instance.ActiveHealthController;
-
-                Plugin.HazardsStateInstance = __instance.gameObject.AddComponent<HazardsState>();
-                Plugin.GearStateInstance = __instance.gameObject.AddComponent<GearState>();
-                Plugin.FiringStateInstance = __instance.gameObject.AddComponent<FiringState>();
-                Plugin.SkillStateInstance = __instance.gameObject.AddComponent<SkillState>();
-                Plugin.ReloadStateInstance = __instance.gameObject.AddComponent<ReloadState>();
-
-                //call subscribed mod methods here
+                PlayerEvents.RaiseOnPlayerInit();
             }
+            else 
+            {
+                //raise on bot init
+            }
+        }
+    }
 
-            //add components to bots if required
+    public class PlayerWalkSpeedLimitPatch : ModulePatch
+    {
+        private static FieldInfo playerField;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            playerField = AccessTools.Field(typeof(MovementContext), "_player");
+            return typeof(MovementContext).GetMethod("StateSpeedLimit", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(MovementContext __instance, ref float __result)
+        {
+            Player player = (Player)playerField.GetValue(__instance);
+            if (player.IsYourPlayer)
+            {
+                __result = StatModifiers.MaxWalkSpeedModifier.Apply(__result);
+            }
+        }
+    }
+
+    public class PlayerSprintSpeedLimitPatch : ModulePatch
+    {
+        private static FieldInfo playerField;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            playerField = AccessTools.Field(typeof(MovementContext), "_player");
+            return typeof(MovementContext).GetMethod("StateSprintSpeedLimit", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(MovementContext __instance, ref float __result)
+        {
+            Player player = (Player)playerField.GetValue(__instance);
+            if (player.IsYourPlayer)
+            {
+                __result = StatModifiers.MaxSprintSpeedModifier.Apply(__result);
+            }
+        }
+    }
+
+    public class OnWeightUpdatedPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(BasePhysicalClass).GetMethod("OnWeightUpdated", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(BasePhysicalClass __instance)
+        {
+            if (__instance.IobserverToPlayerBridge_0.iPlayer.IsYourPlayer)
+            {
+                BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
+
+                __instance.SprintAcceleration = StatModifiers.SprintAccelModifier.Apply(__instance.SprintAcceleration);
+                __instance.PreSprintAcceleration = StatModifiers.PreSprintAccelModifier.Apply(__instance.PreSprintAcceleration);
+            }
         }
     }
 }

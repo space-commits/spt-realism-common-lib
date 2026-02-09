@@ -1,6 +1,7 @@
 ﻿using BSG.CameraEffects;
 using EFT;
 using EFT.InventoryLogic;
+using RealismCommonLib.Events;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -22,12 +23,26 @@ namespace RealismCommonLib.StateControllers
 
         public bool GearBlocksMouth { get; private set; }
 
-        //stance controller has a say via config option
-        public bool NVGsCouldBlockADS { get; private set; }
+        void Awake()
+        {
 
-        //need a check for gear overhaul to check if gear permits ADS with face shield on
-        //stance controller also has a say via config option
-        public bool FaceShieldCouldBlockADS { get; private set; }
+            CheckGear();
+
+            PlayerEvents.OnPlayerInit += CheckGear;
+            PlayerEvents.OnItemAddedOrRemoved += CheckGear;
+            InputEvents.ToggleGogglesInput += CheckGear;
+            InputEvents.ChangeScopeInput += CheckGear;
+            InputEvents.ChangeScopeMagnificationInput += CheckGear;
+        }
+
+        void OnDestroy()
+        {
+            PlayerEvents.OnItemAddedOrRemoved -= CheckGear;
+            PlayerEvents.OnPlayerInit -= CheckGear;
+            InputEvents.ToggleGogglesInput -= CheckGear;
+            InputEvents.ChangeScopeInput -= CheckGear;
+            InputEvents.ChangeScopeMagnificationInput -= CheckGear;
+        }
 
         public void CheckGear()
         {
@@ -39,8 +54,6 @@ namespace RealismCommonLib.StateControllers
             FaceShieldIsActive = fsComponent != null && (fsComponent.Togglable == null || fsComponent.Togglable.On);
             NVGIsActive = nvgComponent != null && (nvgComponent.Togglable == null || nvgComponent.Togglable.On);
             ThermalIsActive = thermComponent != null && (thermComponent.Togglable == null || thermComponent.Togglable.On);
-            FaceShieldCouldBlockADS = FaceShieldIsActive;
-            NVGsCouldBlockADS =  (NVGIsActive && player.ProceduralWeaponAnimation.CurrentScope.IsOptic) || ThermalIsActive;
         }
     }
 }
