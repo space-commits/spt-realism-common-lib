@@ -7,11 +7,13 @@ using EFT.InventoryLogic;
 using EFT.Animations;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
+using RealismCommonLib.Events;
 
 namespace RealismCommonLib.StateControllers
 {
     public class WeaponState : MonoBehaviour
     {
+        //TODO: replace, refactor stance module to figure this out itself
         //Ergo factor in Realism was used and balanced around 80 being the best possible ergo
         private const float BASE_REALISM_ERGO_FACTOR = 80f;
 
@@ -186,6 +188,7 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
+        //TODO: replace, refactor stance module to figure this out itself
         public float ErgoFactor 
         {
             get 
@@ -198,12 +201,25 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
+        void Awake() 
+        {
+            PWAEvents.OnUpdateWeaponVariables += UpdateWeaponStateOnStateChange;
+            PWAEvents.OnPWAInitialize += UpdateWeaponStateOnStateChange;
+        }
+
+        void Destroy()
+        {
+            PWAEvents.OnUpdateWeaponVariables -= UpdateWeaponStateOnStateChange;
+            PWAEvents.OnPWAInitialize -= UpdateWeaponStateOnStateChange;
+        }
+
         //TODO: attachment overhaul needs a way to override
         public void CheckForShoulderContact()
         {
             _hasShoulderContact = PlayerStateInstance.Player.ProceduralWeaponAnimation._shouldMoveWeaponCloser && !IsPistol;
         }
 
+        //TODO: replace, refactor stance module to figure this out itself
         public void UpdateErgoFactor() 
         {
             _ergoFactor = Mathf.Clamp(BASE_REALISM_ERGO_FACTOR - TotalErgo, 1f, BASE_REALISM_ERGO_FACTOR);

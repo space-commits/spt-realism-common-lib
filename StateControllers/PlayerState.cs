@@ -56,6 +56,14 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
+        public bool WeaponIsReady
+        {
+            get
+            {
+                return FirearmController != null && FirearmController?.Weapon != null;
+            }
+        }
+
         public ProceduralWeaponAnimation ProceduralWeaponAnimation
         {
             get

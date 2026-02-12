@@ -9,9 +9,7 @@ namespace RealismCommonLib.StateControllers
 {
     public class GameState: MonoBehaviour
     {
-        private TimeInterval _checkGate = new TimeInterval(1f);
-
-        public bool WeaponIsReady { get; private set; } = false;
+        private TimeInterval _checkGate = new TimeInterval(0.25f);
 
         public bool IsInHideout { get; private set; } = false;
 
@@ -35,27 +33,21 @@ namespace RealismCommonLib.StateControllers
             return gameWorld.GetAlivePlayerByProfileID(id);
         }
 
+        //TODO: replace with events rather than doing these inefficent checks
+        //may not be reliable enough if not called per frame, may leak exceptions 
         public void CheckIsReady()
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             SessionResultPanel sessionResultPanel = Singleton<SessionResultPanel>.Instance;
 
             Player player = gameWorld?.MainPlayer;
-            if (player != null)
-            {
-                WeaponIsReady = player?.HandsController != null && player?.HandsController?.Item != null && player?.HandsController?.Item is Weapon ? true : false;
-                IsInHideout = player is HideoutPlayer ? true : false;
-            }
-            else
-            {
-                WeaponIsReady = false;
-                IsInHideout = false;
-            }
 
-            if (gameWorld == null || gameWorld.AllAlivePlayersList == null || gameWorld.MainPlayer == null || sessionResultPanel != null)
+            PlayerIsReady = player != null && player.IsYourPlayer;
+            IsInHideout = player != null || player is HideoutPlayer ? true : false;
+
+            if (gameWorld == null || gameWorld.AllAlivePlayersList == null || player == null || sessionResultPanel != null)
             {
                 PlayerIsReady = false;
-                WeaponIsReady = false;
                 IsInHideout = false;
             }
         }
