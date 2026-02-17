@@ -304,7 +304,7 @@ namespace RealismCommonLib.Patches
             {
                 ReloadEvents.RaiseOnCurrentMagRemoved();
 
-                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.CurrentMagSpeed.Value, StatModifiers.CurrentMagRemoveSpeed);
+                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.CurrentMagSpeedMulti.Value, StatModifiers.CurrentMagRemoveSpeed);
                 __instance.SetAnimationSpeed(totalSpeed);
 
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMagTypeCurrent===");
@@ -336,7 +336,7 @@ namespace RealismCommonLib.Patches
                 //watch if calling this twice caused issues
                 ReloadEvents.RaiseOnCurrentMagRemoved();
 
-                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.CurrentMagSpeed.Value, StatModifiers.CurrentMagRemoveSpeed);
+                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.CurrentMagSpeedMulti.Value, StatModifiers.CurrentMagRemoveSpeed);
                 fa.SetAnimationSpeed(totalSpeed);
 
                 if (PluginConfig.EnableReloadLogging.Value == true)
@@ -363,7 +363,7 @@ namespace RealismCommonLib.Patches
             {
                 ReloadEvents.RaiseOnNewMagInserted();
 
-                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.MagInsertSpeed.Value, StatModifiers.NewMagReloadSpeed);               
+                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.MagInsertSpeedMulti.Value, StatModifiers.NewMagReloadSpeed);               
                 __instance.SetAnimationSpeed(totalSpeed);
 
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMagInWeapon===");

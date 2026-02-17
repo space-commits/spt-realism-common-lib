@@ -4,7 +4,7 @@ using UnityEngine;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
 
 
@@ -16,7 +16,7 @@ namespace RealismCommonLib.StateControllers
         private TimeGate _firingFromStanceTimeGate = new TimeGate(PluginConfig.FiringFromStanceResetDelay.Value);
         private TimeGate _firingVisualRecoilTimeGate = new TimeGate(PluginConfig.FiringVisualResetDelay.Value);
 
-        public bool AutoFireOn 
+        public bool AutoFireOn
         {
             get
             {
@@ -25,10 +25,10 @@ namespace RealismCommonLib.StateControllers
         }
 
         //exposed for external use
-        public bool IsFiring 
-        { 
-            get 
-            { 
+        public bool IsFiring
+        {
+            get
+            {
                 return _firingTimeGate.IsActive || AutoFireOn;
             }
         }
@@ -69,23 +69,23 @@ namespace RealismCommonLib.StateControllers
 
         public float FiringDuration { get; private set; } = 0;
 
-        void Awake() 
+        void Awake()
         {
             InputEvents.ToggleGogglesInput += UpdateHipfireState;
         }
 
-        void Update() 
+        void Update()
         {
             UpdateFiringState();
         }
 
-        void OnDestroy() 
+        void OnDestroy()
         {
             InputEvents.ToggleGogglesInput -= UpdateHipfireState;
         }
 
         //update hipfire to take NVG toggle into account
-        private void UpdateHipfireState() 
+        private void UpdateHipfireState()
         {
             PlayerStateInstance.FirearmController.UpdateHipInaccuracy();
         }
@@ -108,7 +108,7 @@ namespace RealismCommonLib.StateControllers
 
         public void SetFiringState()
         {
-            Events.PlayerEvents.RaiseOnShotFired();
+            PlayerEvents.RaiseOnShotFired();
 
             ShotCount++;
 

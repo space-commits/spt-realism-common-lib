@@ -8,12 +8,12 @@ using System.Numerics;
 using System.Text;
 using UnityEngine;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
-    public class GearState: MonoBehaviour
+    public class GearState : MonoBehaviour
     {
 
-        public bool HasGasMask { get;  private set; }
+        public bool HasGasMask { get; private set; }
 
         public bool FaceShieldIsActive { get; private set; }
 

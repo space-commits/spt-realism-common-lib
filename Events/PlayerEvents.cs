@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EFT;
 
 namespace RealismCommonLib.Events
 {
     public static class PlayerEvents
     {
-        public static event Action? OnPlayerInit;
+        public static event Action<Player>? OnPlayerInit;
 
         public static event Action? OnItemAddedOrRemoved;
 
@@ -14,14 +15,16 @@ namespace RealismCommonLib.Events
 
         public static event Action? OnShotFired;
 
+        public static event Action? OnWeaponDraw;
+
         internal static void RaiseOnAimStateChanged()
         {
             BaseEventHandler.RaiseEvent(AimStateChanged);
         }
 
-        internal static void RaiseOnPlayerInit()
+        internal static void RaiseOnPlayerInit(Player player)
         {
-            BaseEventHandler.RaiseEvent(OnPlayerInit);
+            BaseEventHandler.RaiseEvent(OnPlayerInit, player);
         }
 
         internal static void RaiseOnItemAddedOrRemoved()
@@ -32,6 +35,11 @@ namespace RealismCommonLib.Events
         internal static void RaiseOnShotFired()
         {
             BaseEventHandler.RaiseEvent(OnShotFired);
+        }
+
+        internal static void RaiseOnWeaponDraw()
+        {
+            BaseEventHandler.RaiseEvent(OnWeaponDraw);
         }
     }
 }

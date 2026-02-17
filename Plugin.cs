@@ -1,9 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using RealismCommonLib.Controllers;
-using RealismCommonLib.StateControllers;
 using RealismCommonLib.Patches;
 using UnityEngine;
+using RealismCommonLib.StateControllers.InstanceState;
 
 namespace RealismCommonLib
 {
@@ -48,6 +48,8 @@ namespace RealismCommonLib
         void Awake()
         {
             ModLogger = Logger;
+            PluginConfig.InitConfigBindings(Config);
+            EnablePatches();
         }
 
         void Update()
@@ -56,14 +58,28 @@ namespace RealismCommonLib
             FPSFactor = GetFPSFactor();
         }
 
-        private void EnablePatches() 
+        void EnablePatches() 
         {
+            //Input
+            new KeyInputPatch1().Enable();
+            new KeyInputPatch2().Enable();
+
+            //Aiming
+            new ToggleAimPatch().Enable();
+
             //Shooting
             new ShootPatch().Enable();
 
             //Player
             new OnItemAddedOrRemovedPatch().Enable();
             new PlayerInitPatch().Enable();
+            new PlayerWalkSpeedLimitPatch().Enable();
+            new PlayerSprintSpeedLimitPatch().Enable();
+            new OnWeightUpdatedPatch().Enable();
+
+            //PWA Patches
+            new UpdateWeaponVariablesPatch().Enable();
+            new PwaWeaponParamsPatch().Enable();
 
             //Reload
             new SetAnimatorAndProceduralValuesPatch().Enable();

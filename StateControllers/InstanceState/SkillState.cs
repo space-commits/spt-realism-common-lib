@@ -6,19 +6,19 @@ using UnityEngine;
 using static RealismCommonLib.Plugin;
 using WeaponSkills = EFT.SkillManager.GClass2250;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
-    public class SkillState: MonoBehaviour
+    public class SkillState : MonoBehaviour
     {
 
 
-        public WeaponSkills WeaponSkillBuffs 
-        { 
+        public WeaponSkills WeaponSkillBuffs
+        {
             get
             {
                 return PlayerStateInstance.Player.Skills.GetWeaponInfo(WeaponStateInstance.Weapon);
             }
-        
+
         }
 
         public float AimSkillADSBuff

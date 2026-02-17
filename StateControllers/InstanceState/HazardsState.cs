@@ -4,7 +4,7 @@ using EFT.Animations;
 using EFT.HealthSystem;
 using UnityEngine;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
     public class HazardsState : MonoBehaviour
     {

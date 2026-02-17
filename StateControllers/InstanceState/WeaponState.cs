@@ -9,7 +9,7 @@ using static EFT.Player;
 using static RealismCommonLib.Plugin;
 using RealismCommonLib.Events;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
     public class WeaponState : MonoBehaviour
     {
@@ -39,13 +39,13 @@ namespace RealismCommonLib.StateControllers
 
         public float TotalErgo { get; set; }
 
-        public float TotalWeaponWeight 
+        public float TotalWeaponWeight
         {
-            get 
+            get
             {
                 return _totalWeaponWeight;
             }
-            private set 
+            private set
             {
                 _totalWeaponWeight = value;
             }
@@ -99,7 +99,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return !HasShoulderContact &&  (IsMachinePistol || IsPistol);
+                return !HasShoulderContact && (IsMachinePistol || IsPistol);
             }
         }
 
@@ -107,8 +107,8 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return 
-                    PlayerStateInstance.Player.ProceduralWeaponAnimation.CurrentScope != null && 
+                return
+                    PlayerStateInstance.Player.ProceduralWeaponAnimation.CurrentScope != null &&
                     PlayerStateInstance.Player.ProceduralWeaponAnimation.CurrentScope.IsOptic;
             }
         }
@@ -134,7 +134,7 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return IsBoltAction || (IsShotgun && _weapon.SelectedFireMode == Weapon.EFireMode.single);
+                return IsBoltAction || IsShotgun && _weapon.SelectedFireMode == Weapon.EFireMode.single;
             }
         }
 
@@ -158,7 +158,7 @@ namespace RealismCommonLib.StateControllers
 
         //this should only return BSG aim speed if attahcment overhaul is not present, but should still be factored by health state
         //it needs to factor adrenaline, stamina, injury, weapon stats, weapon sight, etc. as calculated previously
-        public float TotalFinalAimSpeed 
+        public float TotalFinalAimSpeed
         {
             get
             {
@@ -189,20 +189,21 @@ namespace RealismCommonLib.StateControllers
         }
 
         //TODO: replace, refactor stance module to figure this out itself
-        public float ErgoFactor 
+        public float ErgoFactor
         {
-            get 
+            get
             {
                 return _ergoFactor;
             }
-            private set 
+            private set
             {
                 _ergoFactor = Mathf.Clamp(value, 1f, BASE_REALISM_ERGO_FACTOR);
             }
         }
 
-        void Awake() 
+        void Awake()
         {
+            SetWeaponStateOnAwake();
             PWAEvents.OnUpdateWeaponVariables += UpdateWeaponStateOnStateChange;
             PWAEvents.OnPWAInitialize += UpdateWeaponStateOnStateChange;
         }
@@ -220,7 +221,7 @@ namespace RealismCommonLib.StateControllers
         }
 
         //TODO: replace, refactor stance module to figure this out itself
-        public void UpdateErgoFactor() 
+        public void UpdateErgoFactor()
         {
             _ergoFactor = Mathf.Clamp(BASE_REALISM_ERGO_FACTOR - TotalErgo, 1f, BASE_REALISM_ERGO_FACTOR);
         }
@@ -235,8 +236,8 @@ namespace RealismCommonLib.StateControllers
             TotalWeaponWeight = _weapon.TotalWeight;
             WeaponLength = PlayerStateInstance.FirearmController.Item.CalculateCellSize().X;
 
-            if (!Plugin.AttachmentOverhaulEnabled) 
-            {          
+            if (!AttachmentOverhaulEnabled)
+            {
                 //stats
                 TotalErgo = Weapon.ErgonomicsTotal;
                 UpdateErgoFactor();
@@ -249,16 +250,10 @@ namespace RealismCommonLib.StateControllers
         /// <summary>
         /// For immutable weapon properties
         /// </summary>
-        public void SetWeaponStateOnAwake() 
+        public void SetWeaponStateOnAwake()
         {
             _isPistol = Weapon.WeapClass.ToLower() == "pistol";
             _isShotgun = Weapon.WeapClass.ToLower() == "shotgun";
         }
-
-        void Awake() 
-        {
-            SetWeaponStateOnAwake();
-        }
-
     }
 }

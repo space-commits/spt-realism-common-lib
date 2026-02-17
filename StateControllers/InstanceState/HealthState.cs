@@ -1,18 +1,14 @@
-﻿using RealismCommonLib.Utils
-using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.HealthSystem;
-using EFT.InventoryLogic;
-using HarmonyLib;
+using RealismCommonLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Reflection;
 using UnityEngine;
-using EffectClass = EFT.HealthSystem.ActiveHealthController.GClass3008; //DisplayableVariations, OverallDuration, Existing
+using static RealismCommonLib.Plugin;
 using ContusionInterface = GInterface352;
 using DehydrationInterface = GInterface343;
+using EffectClass = EFT.HealthSystem.ActiveHealthController.GClass3008; //DisplayableVariations, OverallDuration, Existing
 using ExhaustionInterface = GInterface344;
 using FractureInterface = GInterface342;
 using HeavyBleedingInterface = GInterface340;
@@ -23,7 +19,7 @@ using PainKillerInterface = GInterface358;
 using TremorInterface = GInterface361;
 using TunnelVisionInterface = GInterface363;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
     public static class MedProperties
     {
@@ -44,9 +40,8 @@ namespace RealismCommonLib.StateControllers
     }
 
 
-    public class HealthState: MonoBehaviour
+    public class HealthState : MonoBehaviour
     {
-        internal ActiveHealthController _activeHealthController;
         private TimeInterval _baseTimeGate = new TimeInterval(5f);
 
         public List<EBodyPart> PossibleBodyParts = new List<EBodyPart>
@@ -87,6 +82,14 @@ namespace RealismCommonLib.StateControllers
 
         public bool HasFracturedArmRight { get; private set; } = false;
 
+        public ActiveHealthController ActiveHealthController
+        {
+            get
+            {
+                return PlayerStateInstance.Player.ActiveHealthController;
+            }
+        }
+
         public bool HasFracturedArm
         {
             get
@@ -126,9 +129,9 @@ namespace RealismCommonLib.StateControllers
 
         public float HealthStamRegenFactor { get; set; } = 1f;
 
-        public float StanceInjuryMulti  { get; set; } = 1f;
+        public float StanceInjuryMulti { get; set; } = 1f;
 
-        void Update() 
+        void Update()
         {
             if (_baseTimeGate.Ready())
             {
@@ -137,7 +140,7 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
-        private Type GetStatusEffectType (string effectName)
+        private Type GetStatusEffectType(string effectName)
         {
             Type effectType;
             MedProperties.EffectTypes.TryGetValue(effectName, out effectType);
@@ -147,21 +150,21 @@ namespace RealismCommonLib.StateControllers
         private void CheckHealthAndStatusEffects()
         {
             Type fractureType = GetStatusEffectType("BrokenBone");
-            
-            foreach (EBodyPart part in PossibleBodyParts) 
+
+            foreach (EBodyPart part in PossibleBodyParts)
             {
-                IEnumerable<IEffect> effects = _player.ActiveHealthController.GetAllActiveEffects(part);
+                IEnumerable<IEffect> effects = PlayerStateInstance.Player.ActiveHealthController.GetAllActiveEffects(part);
                 PartsWithFractures[part] = effects.Any(e => e.Type == fractureType);
-                PartsHPPerc[part] = _player.ActiveHealthController.GetBodyPartHealth(part).Current / _player.ActiveHealthController.GetBodyPartHealth(part).Maximum;
+                PartsHPPerc[part] = ActiveHealthController.GetBodyPartHealth(part).Current / PlayerStateInstance.Player.ActiveHealthController.GetBodyPartHealth(part).Maximum;
             }
 
             HasBlackedArmLeft = PartsHPPerc[EBodyPart.LeftArm] <= 0f;
             HasBlackedArmRight = PartsHPPerc[EBodyPart.RightArm] <= 0f;
             HasFracturedArmLeft = PartsWithFractures[EBodyPart.LeftArm];
             HasFracturedArmRight = PartsWithFractures[EBodyPart.RightArm];
-            IsOnPainKiller = HasBaseEFTEffect(_player, "PainKiller");
-            IsDehydrated = HasBaseEFTEffect(_player, "Dehydration");
-            IsExhausted = HasBaseEFTEffect(_player, "Exhaustion");
+            IsOnPainKiller = HasBaseEFTEffect(PlayerStateInstance.Player, "PainKiller");
+            IsDehydrated = HasBaseEFTEffect(PlayerStateInstance.Player, "Dehydration");
+            IsExhausted = HasBaseEFTEffect(PlayerStateInstance.Player, "Exhaustion");
         }
 
         public bool HasBaseEFTEffect(Player player, string targetEffect)

@@ -1,10 +1,12 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.Events;
 using RealismCommonLib.ModifierHandlers;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using static EFT.Player.FirearmController;
 
 
 namespace RealismCommonLib.Patches
@@ -39,14 +41,33 @@ namespace RealismCommonLib.Patches
         {
             if (__instance.IsYourPlayer)
             {
-                PlayerEvents.RaiseOnPlayerInit();
+                PlayerEvents.RaiseOnPlayerInit(__instance);
             }
             else 
             {
-                //raise on bot init
+                //TODO: raise on bot init
             }
         }
     }
+
+    //trigger weapon swap
+    public class OnWeaponDrawPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(GClass2055).GetMethod("Start", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(GClass2055 __instance)
+        {
+            if (__instance.Player_0.IsYourPlayer)
+            {
+                PWAEvents.RaiseOnPWAInitialize(__instance.Player_0);
+            }
+        }
+    }
+
 
     public class PlayerWalkSpeedLimitPatch : ModulePatch
     {

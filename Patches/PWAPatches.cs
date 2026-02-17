@@ -8,7 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using static EFT.Player;
 
-namespace RealismCommonLib.CommonPatches
+namespace RealismCommonLib.Patches
 {
     public class UpdateWeaponVariablesPatch : ModulePatch
     {

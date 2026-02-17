@@ -13,9 +13,9 @@ using UnityEngine;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
-    public static class PlayerConsts 
+    public static class PlayerConsts
     {
         public const float AIM_MOVE_SPEED_BASE = 0.5f;
 
@@ -29,7 +29,7 @@ namespace RealismCommonLib.StateControllers
 
     }
 
-    public class PlayerState: MonoBehaviour
+    public class PlayerState : MonoBehaviour
     {
         private Player _player;
         private bool _isScav;
@@ -40,18 +40,18 @@ namespace RealismCommonLib.StateControllers
         {
             get
             {
-                return _player; 
+                return _player;
             }
-            internal set 
+            internal set
             {
                 _player = value;
             }
         }
 
-        public Player.FirearmController FirearmController
+        public FirearmController FirearmController
         {
             get
-            { 
+            {
                 return Player.HandsController as FirearmController;
             }
         }
@@ -72,11 +72,11 @@ namespace RealismCommonLib.StateControllers
             }
         }
 
-        public bool IsMoving 
+        public bool IsMoving
         {
-            get 
+            get
             {
-              return IsSprinting || (_player.ProceduralWeaponAnimation.Mask & EProceduralAnimationMask.Walking) != (EProceduralAnimationMask)0;
+                return IsSprinting || (_player.ProceduralWeaponAnimation.Mask & EProceduralAnimationMask.Walking) != 0;
             }
         }
 
@@ -94,23 +94,23 @@ namespace RealismCommonLib.StateControllers
             {
                 return _isScav;
             }
-            private set 
+            private set
             {
                 _isScav = value;
             }
         }
 
-        public bool IsUsingStationaryWeapon 
+        public bool IsUsingStationaryWeapon
         {
-            get 
+            get
             {
                 return _player.MovementContext.StationaryWeapon == null;
             }
         }
 
-        public bool IsInventoryOpen 
+        public bool IsInventoryOpen
         {
-            get 
+            get
             {
                 return _player.IsInventoryOpened;
             }
@@ -137,7 +137,7 @@ namespace RealismCommonLib.StateControllers
         //may be a redundant feature if doing dead zone instead
         public bool EnableMouseSensPenalty { get; private set; }
 
-        void Awake() 
+        void Awake()
         {
             IsScav = Singleton<GameWorld>.Instance?.MainPlayer?.Profile?.Info?.Side == EPlayerSide.Savage;
 
@@ -148,28 +148,28 @@ namespace RealismCommonLib.StateControllers
             PlayerEvents.OnPlayerInit += CalcPlayerWeightStats;
         }
 
-        void Update() 
+        void Update()
         {
-           if (_staminaCalcTimer.Ready()) CalcStaminaFactors();
+            if (_staminaCalcTimer.Ready()) CalcStaminaFactors();
         }
 
-        void onDestroy() 
+        void onDestroy()
         {
             PlayerEvents.OnItemAddedOrRemoved -= CalcPlayerWeightStats;
             PlayerEvents.OnPlayerInit -= CalcPlayerWeightStats;
-        }   
+        }
 
         /// <summary>
         /// Resets the player's procedural weapon animation state, useful to reset sway.
         /// </summary>
-        public void ResetProceduralState() 
+        public void ResetProceduralState()
         {
             _player.ProceduralWeaponAnimation.method_23();
         }
 
         private void CalcStaminaFactors()
         {
-            float remainArmStamPercent = Mathf.Min((_player.Physical.HandsStamina.Current / _player.Physical.HandsStamina.TotalCapacity) * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
+            float remainArmStamPercent = Mathf.Min(_player.Physical.HandsStamina.Current / _player.Physical.HandsStamina.TotalCapacity * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
             BaseStaminaPerc = _player.Physical.Stamina.Current / _player.Physical.Stamina.TotalCapacity;
 
             RemainingArmStamFactor = Mathf.Pow(remainArmStamPercent, PlayerConsts.REMAINING_ARM_STAM_FACTOR);
@@ -191,7 +191,7 @@ namespace RealismCommonLib.StateControllers
         /// <summary>
         /// Sets MovementContext.SpeedLimitIsDirty to true, which forces speed limit to update. Do not call in update.
         /// </summary>
-        public void UpdateWalkSpeedLimits() 
+        public void UpdateWalkSpeedLimits()
         {
             Player.MovementContext.SpeedLimitIsDirty = true;
         }

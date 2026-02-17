@@ -22,5 +22,23 @@ namespace RealismCommonLib.Events
                 }
             }
         }
+
+        public static void RaiseEvent<T>(Action<T>? eventHandler, T arg)
+        {
+            if (eventHandler == null) return;
+
+            foreach (Action<T> handler in eventHandler.GetInvocationList())
+            {
+                try
+                {
+                    handler(arg);
+                }
+                catch (Exception ex)
+                {
+                    Plugin.ModLogger.LogError(
+                        $"Error invoking {nameof(eventHandler)}: {ex}");
+                }
+            }
+        }
     }
 }

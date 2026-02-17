@@ -6,16 +6,16 @@ using static EFT.Player;
 using static RealismCommonLib.Plugin;
 using RealismCommonLib.ModifierHandlers;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
-    public class AimingState: MonoBehaviour
+    public class AimingState : MonoBehaviour
     {
-        public bool PlayerCanAim 
+        public bool PlayerCanAim
         {
-            get 
-            { 
-                return BoolHandlers.CanAim.Evaluate(); 
-            } 
+            get
+            {
+                return BoolHandlers.CanAim.Evaluate();
+            }
         }
 
         public bool IsAiming

@@ -5,9 +5,9 @@ using EFT.InventoryLogic;
 using RealismCommonLib.Utils;
 using UnityEngine;
 
-namespace RealismCommonLib.StateControllers
+namespace RealismCommonLib.StateControllers.InstanceState
 {
-    public class GameState: MonoBehaviour
+    public class GameState : MonoBehaviour
     {
         private TimeInterval _checkGate = new TimeInterval(0.25f);
 
@@ -15,7 +15,7 @@ namespace RealismCommonLib.StateControllers
 
         public bool PlayerIsReady { get; private set; } = false;
 
-        public void Update() 
+        public void Update()
         {
             if (_checkGate.Ready()) CheckIsReady();
         }
