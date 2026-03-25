@@ -12,11 +12,14 @@ using System.Reflection;
 using UnityEngine;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
+using JetBrains.Annotations;
+using GPUInstancer;
 
 namespace RealismCommonLib.StateControllers.InstanceState
 {
     public static class PlayerConsts
     {
+        //TODO move these to modules, controller should just emit what the stamina % is.
         public const float AIM_MOVE_SPEED_BASE = 0.5f;
 
         public const float REMAINING_ARM_STAM_FACTOR = 0.5f;
@@ -31,24 +34,13 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
     public class PlayerState : MonoBehaviour
     {
-        private Player _player;
         private bool _isScav;
 
         private TimeInterval _staminaCalcTimer = new TimeInterval(1f);
 
-        public Player Player
-        {
-            get
-            {
-                return _player;
-            }
-            internal set
-            {
-                _player = value;
-            }
-        }
+        public Player Player { get; set; }
 
-        public FirearmController FirearmController
+        public FirearmController? FirearmController
         {
             get
             {
@@ -76,7 +68,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return IsSprinting || (_player.ProceduralWeaponAnimation.Mask & EProceduralAnimationMask.Walking) != 0;
+                return IsSprinting || (Player.ProceduralWeaponAnimation.Mask & EProceduralAnimationMask.Walking) != 0;
             }
         }
 
@@ -84,7 +76,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _player.IsSprintEnabled;
+                return Player.IsSprintEnabled;
             }
         }
 
@@ -104,7 +96,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _player.MovementContext.StationaryWeapon == null;
+                return Player.MovementContext.StationaryWeapon != null;
             }
         }
 
@@ -112,7 +104,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _player.IsInventoryOpened;
+                return Player.IsInventoryOpened;
             }
         }
 
@@ -164,13 +156,17 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// </summary>
         public void ResetProceduralState()
         {
-            _player.ProceduralWeaponAnimation.method_23();
+            Player.ProceduralWeaponAnimation.method_23();
         }
 
         private void CalcStaminaFactors()
         {
-            float remainArmStamPercent = Mathf.Min(_player.Physical.HandsStamina.Current / _player.Physical.HandsStamina.TotalCapacity * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
-            BaseStaminaPerc = _player.Physical.Stamina.Current / _player.Physical.Stamina.TotalCapacity;
+            ModLogger.LogWarning("SkillStateInstance null " + (SkillStateInstance == null) + "  _player.Physical null " + (Player.Physical == null));
+
+            if (Player || Player.Physical == null) return; 
+
+            float remainArmStamPercent = Mathf.Min(Player.Physical.HandsStamina.Current / Player.Physical.HandsStamina.TotalCapacity * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
+            BaseStaminaPerc = Player.Physical.Stamina.Current / Player.Physical.Stamina.TotalCapacity;
 
             RemainingArmStamFactor = Mathf.Pow(remainArmStamPercent, PlayerConsts.REMAINING_ARM_STAM_FACTOR);
             RemainingArmStamReloadFactor = Mathf.Clamp(Mathf.Pow(remainArmStamPercent, PlayerConsts.REMAINING_ARM_STAM_RELOAD_FACTOR), PlayerConsts.REMAINING_ARM_STAM_RELOAD_FACTOR_MIN, 1f);
@@ -180,9 +176,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         private void CalcPlayerWeightStats()
         {
-            _player.Inventory.UpdateTotalWeight();
-            float playerWeight = _player.Inventory.TotalWeight;
-            var weapon = _player?.HandsController != null && _player?.HandsController?.Item != null ? _player.HandsController.Item as Weapon : null;
+            if (Player?.Inventory == null) return;
+            Player.Inventory.UpdateTotalWeight();
+            float playerWeight = Player.Inventory.TotalWeight;
+            var weapon = Player.HandsController != null && Player?.HandsController?.Item != null ? Player.HandsController.Item as Weapon : null;
             float weaponWeight = weapon != null ? weapon.TotalWeight : 0f;
             TotalWeightMinusWeapon = playerWeight - weaponWeight;
             TotalWeight = playerWeight;

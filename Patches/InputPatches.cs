@@ -2,6 +2,7 @@
 using RealismCommonLib.Events;
 using RealismCommonLib.PatchPipeline;
 using SPT.Reflection.Patching;
+using System;
 using System.Reflection;
 using InputClass1 = Class1730;
 using InputClass2 = Class1728;
@@ -10,8 +11,20 @@ namespace RealismCommonLib.Patches
 {
     internal static class InputChecker
     {
+        private static ECommand? _lastCommand;
+        private static long _lastCommandTicks;
+        private const int DUPLICATE_THRESHOLD_MS = 20;
+
         public static bool RunInputPipeline(ECommand command)
         {
+            var now = Environment.TickCount;
+
+            if (_lastCommand == command && (now - _lastCommandTicks) < DUPLICATE_THRESHOLD_MS)
+                return true;
+
+            _lastCommand = command;
+            _lastCommandTicks = now;
+
             var inputCtx = new InputContext(command);
 
             if (Pipelines.InputVetoPipeline.ShouldVeto(inputCtx))
@@ -49,6 +62,7 @@ namespace RealismCommonLib.Patches
                     InputEvents.RaiseScrollInput();
                     break;
                 case ECommand.WeaponMounting:
+                    Plugin.ModLogger.LogWarning("WeaponMounting input");
                     InputEvents.RaiseWeaponMountingInput();
                     break;
                 case ECommand.ToggleGoggles:
@@ -82,6 +96,7 @@ namespace RealismCommonLib.Patches
         [PatchPrefix]
         private static bool PatchPrefix(InputClass1 __instance, ECommand command)
         {
+            Plugin.ModLogger.LogWarning("InputClass1 input");
             return InputChecker.RunInputPipeline(command);
         }
     }
@@ -96,6 +111,7 @@ namespace RealismCommonLib.Patches
         [PatchPrefix]
         private static bool PatchPrefix(InputClass2 __instance, ECommand command)
         {
+            Plugin.ModLogger.LogWarning("InputClass2 input");
             return InputChecker.RunInputPipeline(command);
         }
     }

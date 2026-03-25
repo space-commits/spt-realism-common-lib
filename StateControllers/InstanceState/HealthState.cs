@@ -133,10 +133,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void Update()
         {
-            if (_baseTimeGate.Ready())
+            if (_baseTimeGate.Ready() && ActiveHealthController != null)
             {
                 CheckHealthAndStatusEffects();
-
             }
         }
 

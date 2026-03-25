@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.Events;
 using RealismCommonLib.ModifierHandlers;
@@ -41,7 +40,8 @@ namespace RealismCommonLib.Patches
         {
             if (__instance.IsYourPlayer)
             {
-                PlayerEvents.RaiseOnPlayerInit(__instance);
+                PlayerEvents.RaiseOnPlayerInitArgs(__instance);
+                PlayerEvents.RaiseOnPlayerInit();
             }
             else 
             {
@@ -63,7 +63,9 @@ namespace RealismCommonLib.Patches
         {
             if (__instance.Player_0.IsYourPlayer)
             {
-                PWAEvents.RaiseOnPWAInitialize(__instance.Player_0);
+                var fc = __instance.Player_0.HandsController as Player.FirearmController;
+                if (fc == null) return;
+                PWAEvents.RaiseOnPWAInitialize(fc);
             }
         }
     }
@@ -76,7 +78,7 @@ namespace RealismCommonLib.Patches
         protected override MethodBase GetTargetMethod()
         {
             playerField = AccessTools.Field(typeof(MovementContext), "_player");
-            return typeof(MovementContext).GetMethod("StateSpeedLimit", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(MovementContext).GetMethod("get_StateSpeedLimit", BindingFlags.Instance | BindingFlags.Public);
         }
 
         [PatchPostfix]
@@ -97,7 +99,7 @@ namespace RealismCommonLib.Patches
         protected override MethodBase GetTargetMethod()
         {
             playerField = AccessTools.Field(typeof(MovementContext), "_player");
-            return typeof(MovementContext).GetMethod("StateSprintSpeedLimit", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(MovementContext).GetMethod("get_StateSprintSpeedLimit", BindingFlags.Instance | BindingFlags.Public);
         }
 
         [PatchPostfix]

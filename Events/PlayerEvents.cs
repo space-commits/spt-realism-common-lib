@@ -7,7 +7,15 @@ namespace RealismCommonLib.Events
 {
     public static class PlayerEvents
     {
-        public static event Action<Player>? OnPlayerInit;
+        /// <summary>
+        /// Fires when the player is initialized, providing the Player instance as an argument.
+        /// </summary>
+        public static event Action<Player>? OnPlayerInitArgs;
+
+        /// <summary>
+        /// Fires when the player is initialized, does not pass Palyer instance.
+        /// </summary>
+        public static event Action? OnPlayerInit;
 
         public static event Action? OnItemAddedOrRemoved;
 
@@ -22,9 +30,14 @@ namespace RealismCommonLib.Events
             BaseEventHandler.RaiseEvent(AimStateChanged);
         }
 
-        internal static void RaiseOnPlayerInit(Player player)
+        internal static void RaiseOnPlayerInit()
         {
-            BaseEventHandler.RaiseEvent(OnPlayerInit, player);
+            BaseEventHandler.RaiseEvent(OnPlayerInit);
+        }
+
+        internal static void RaiseOnPlayerInitArgs(Player player)
+        {
+            BaseEventHandler.RaiseEvent(OnPlayerInitArgs, player);
         }
 
         internal static void RaiseOnItemAddedOrRemoved()

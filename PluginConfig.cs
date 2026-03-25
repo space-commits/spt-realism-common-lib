@@ -1,7 +1,9 @@
 ﻿using BepInEx.Configuration;
+using RealismCommonLib.Utils;
 using System;
 using UnityEngine;
-
+using static GClass2175;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace RealismCommonLib
 {
@@ -113,6 +115,32 @@ namespace RealismCommonLib
             InternalMagReloadMulti = config.Bind<float>(weaponSpeed, "Internal Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1}));
             CurrentMagSpeedMulti = config.Bind<float>(weaponSpeed, "Remove Magazine Reload Speed Multi", 1f, new ConfigDescription("Speed of removing magazine during reload sequence.", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
             MagInsertSpeedMulti = config.Bind<float>(weaponSpeed, "Insert Magazine Reload Speed Multi", 1f, new ConfigDescription("Speed of inserting magazine during reload sequance.", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
+        }
+
+        public static ConfigEntry<float> KeyTime;
+        public static ConfigEntry<float> KeyValue;
+        public static ConfigEntry<float> InTangent;
+        public static ConfigEntry<float> OutTangent;
+        public static ConfigEntry<int> KeyIndex;
+
+        public static void InitTempBindings(ConfigFile config)
+        {
+            KeyTime = config.Bind<float>("Curve Builder", "Key Time", 0f, new ConfigDescription("", new AcceptableValueRange<float>(-1000, 1000), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
+            KeyValue = config.Bind<float>("Curve Builder", "Key Value", 0f, new ConfigDescription("", new AcceptableValueRange<float>(-1000, 1000), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 2 }));
+            InTangent = config.Bind<float>("Curve Builder", "In Tangent", 0f, new ConfigDescription("", new AcceptableValueRange<float>(-1000, 1000), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 3 }));
+            OutTangent = config.Bind<float>("Curve Builder", "Out Tangent", 0f, new ConfigDescription("", new AcceptableValueRange<float>(-1000, 1000), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 4 }));
+            KeyIndex = config.Bind<int>("Curve Builder", "Key Index", -1, new ConfigDescription("", new AcceptableValueRange<int>(-1000, 1000), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 5 }));
+
+            config.Bind(
+                "Curve Builder",
+                "Curve Tools",
+                "",
+                new ConfigDescription(
+                    "Runtime curve builder",
+                    null,
+                    new ConfigurationManagerAttributes { CustomDrawer = CurveDrawer.CurveBuilderDrawer }
+                )
+            );
         }
     }
 }

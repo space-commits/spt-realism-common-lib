@@ -76,6 +76,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void Update()
         {
+            if (PlayerStateInstance?.FirearmController == null) return;
             UpdateFiringState();
         }
 
@@ -87,7 +88,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         //update hipfire to take NVG toggle into account
         private void UpdateHipfireState()
         {
-            PlayerStateInstance.FirearmController.UpdateHipInaccuracy();
+            PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
         }
 
         public void UpdateFiringState()

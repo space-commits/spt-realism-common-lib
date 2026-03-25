@@ -2,10 +2,12 @@
 using EFT;
 using EFT.Animations;
 using EFT.InventoryLogic;
+using EFT.UI.DragAndDrop;
+using RealismCommonLib.StateControllers.InstanceState;
 using RealismCommonLib.Utils;
 using UnityEngine;
 
-namespace RealismCommonLib.StateControllers.InstanceState
+namespace RealismCommonLib.StateControllers.GlobalState
 {
     public class GameState : MonoBehaviour
     {
@@ -15,12 +17,20 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public bool PlayerIsReady { get; private set; } = false;
 
-        public void Update()
+        public bool PlayerIsInRaidOrHideout 
+        {
+            get 
+            {
+                return PlayerIsReady || IsInHideout;
+            }     
+        }
+
+        void Update()
         {
             if (_checkGate.Ready()) CheckIsReady();
         }
 
-        public Player GetYourPlayer()
+        public Player? GetYourPlayer()
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null) return null;
@@ -40,16 +50,17 @@ namespace RealismCommonLib.StateControllers.InstanceState
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             SessionResultPanel sessionResultPanel = Singleton<SessionResultPanel>.Instance;
 
-            Player player = gameWorld?.MainPlayer;
+            Player? gameWorldPlayer = gameWorld?.MainPlayer;
 
-            PlayerIsReady = player != null && player.IsYourPlayer;
-            IsInHideout = player != null || player is HideoutPlayer ? true : false;
-
-            if (gameWorld == null || gameWorld.AllAlivePlayersList == null || player == null || sessionResultPanel != null)
+            if (gameWorld == null || gameWorld.AllAlivePlayersList == null || gameWorldPlayer == null || sessionResultPanel != null)
             {
                 PlayerIsReady = false;
                 IsInHideout = false;
+                return;
             }
+
+            PlayerIsReady = gameWorldPlayer.IsYourPlayer;
+            IsInHideout = gameWorldPlayer is HideoutPlayer;
         }
     }
 }

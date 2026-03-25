@@ -12,8 +12,8 @@ namespace RealismCommonLib.Patches
 {
     public class ShootPatch : ModulePatch
     {
-        private FieldInfo _fcField;
-        private FieldInfo _playerField;
+        private static  FieldInfo _fcField;
+        private static FieldInfo _playerField;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -23,7 +23,7 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPostfix]
-        public void PatchPostfix(ProceduralWeaponAnimation __instance, float str)
+        public static void PatchPostfix(ProceduralWeaponAnimation __instance, float str)
         {
             FirearmController firearmController = (FirearmController)_fcField.GetValue(__instance);
             Player player = (Player)_playerField.GetValue(firearmController);

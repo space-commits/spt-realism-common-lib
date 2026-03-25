@@ -40,7 +40,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.FirearmController.IsInReloadOperation();
+                return PlayerStateInstance?.FirearmController == null || PlayerStateInstance.FirearmController.IsInReloadOperation();
             }
         }
 

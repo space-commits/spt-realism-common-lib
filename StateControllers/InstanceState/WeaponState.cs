@@ -16,9 +16,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
         //TODO: replace, refactor stance module to figure this out itself
         //Ergo factor in Realism was used and balanced around 80 being the best possible ergo
         private const float BASE_REALISM_ERGO_FACTOR = 80f;
-
-        private Weapon _weapon;
-
         //stats
         private float _ergoFactor;
 
@@ -32,9 +29,13 @@ namespace RealismCommonLib.StateControllers.InstanceState
         private bool _isShotgun;
         private bool _treatAsPistol; //is pistol class, or related, and does not have stock     
 
-        public Weapon Weapon
+        public Weapon? WeaponInstance
         {
-            get { return _weapon; }
+            get 
+            {
+                if (PlayerStateInstance.FirearmController == null) return null;
+                return PlayerStateInstance.FirearmController.Item; 
+            }
         }
 
         public float TotalErgo { get; set; }
@@ -55,7 +56,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.FirearmController.HasBipod && PlayerStateInstance.FirearmController.BipodState;
+                return 
+                    PlayerStateInstance.FirearmController != null && 
+                    PlayerStateInstance.FirearmController.HasBipod && 
+                    PlayerStateInstance.FirearmController.BipodState;
             }
         }
 
@@ -124,7 +128,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _weapon.BoltAction;
+                return WeaponInstance != null && WeaponInstance.BoltAction;
             }
         }
 
@@ -134,7 +138,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return IsBoltAction || IsShotgun && _weapon.SelectedFireMode == Weapon.EFireMode.single;
+                return WeaponInstance != null && (IsBoltAction || IsShotgun && WeaponInstance.SelectedFireMode == Weapon.EFireMode.single);
             }
         }
 
@@ -201,17 +205,21 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
+        void Update() 
+        {
+        }
+
         void Awake()
         {
-            SetWeaponStateOnAwake();
             PWAEvents.OnUpdateWeaponVariables += UpdateWeaponStateOnStateChange;
             PWAEvents.OnPWAInitialize += UpdateWeaponStateOnStateChange;
+            PWAEvents.OnPWAInitialize += SetWeaponImmutableState;
         }
 
         void Destroy()
         {
             PWAEvents.OnUpdateWeaponVariables -= UpdateWeaponStateOnStateChange;
-            PWAEvents.OnPWAInitialize -= UpdateWeaponStateOnStateChange;
+            PWAEvents.OnPWAInitialize -= SetWeaponImmutableState;
         }
 
         //TODO: attachment overhaul needs a way to override
@@ -226,20 +234,19 @@ namespace RealismCommonLib.StateControllers.InstanceState
             _ergoFactor = Mathf.Clamp(BASE_REALISM_ERGO_FACTOR - TotalErgo, 1f, BASE_REALISM_ERGO_FACTOR);
         }
 
-        //TODO: this needs to be called in an appropriate method call hook like UpdateWeaponVariables or Method_23()
         /// <summary>
         /// When weapon state changes (reload, fold stock, change firemode etc), update relevant weapon state variables.
-        /// Used for EFT weapon stats, not custom weapon stats.
+        /// Don't use componenet's weapon property as it may be null or not updated when this is called.
         /// </summary>
-        public void UpdateWeaponStateOnStateChange()
-        {
-            TotalWeaponWeight = _weapon.TotalWeight;
-            WeaponLength = PlayerStateInstance.FirearmController.Item.CalculateCellSize().X;
+        public void UpdateWeaponStateOnStateChange(FirearmController fc)
+        {  
+            TotalWeaponWeight = fc.Item.TotalWeight;
+            WeaponLength = fc.Item.CalculateCellSize().X;
 
-            if (!AttachmentOverhaulEnabled)
+            if (!PluginRegistry.AttachmentOverhaulEnabled)
             {
                 //stats
-                TotalErgo = Weapon.ErgonomicsTotal;
+                TotalErgo = fc.Item.ErgonomicsTotal;
                 UpdateErgoFactor();
 
                 //state
@@ -248,12 +255,13 @@ namespace RealismCommonLib.StateControllers.InstanceState
         }
 
         /// <summary>
-        /// For immutable weapon properties
+        /// For immutable weapon properties.
+        /// Don't use componenet's weapon property as it may be null or not updated when this is called.
         /// </summary>
-        public void SetWeaponStateOnAwake()
+        public void SetWeaponImmutableState(FirearmController fc)
         {
-            _isPistol = Weapon.WeapClass.ToLower() == "pistol";
-            _isShotgun = Weapon.WeapClass.ToLower() == "shotgun";
+            _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
+            _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
         }
     }
 }

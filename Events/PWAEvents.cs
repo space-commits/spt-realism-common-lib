@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using EFT;
+using System;
 
 namespace RealismCommonLib.Events
 {
     public static class PWAEvents
     {
-        public static event Action? OnUpdateWeaponVariables;
+        public static event Action<Player.FirearmController>? OnUpdateWeaponVariables;
 
-        public static event Action? OnPWAInitialize;
+        public static event Action<Player.FirearmController>? OnPWAInitialize;
 
-        internal static void RaiseOnUpdateWeaponVariables()
+        internal static void RaiseOnUpdateWeaponVariables(Player.FirearmController fc)
         {
-            BaseEventHandler.RaiseEvent(OnUpdateWeaponVariables);
+            BaseEventHandler.RaiseEvent(OnUpdateWeaponVariables, fc);
         }
 
-        internal static void RaiseOnPWAInitialize()
+        internal static void RaiseOnPWAInitialize(Player.FirearmController fc)
         {
-            BaseEventHandler.RaiseEvent(OnPWAInitialize);
+            BaseEventHandler.RaiseEvent(OnPWAInitialize, fc);
         }
     }
 }

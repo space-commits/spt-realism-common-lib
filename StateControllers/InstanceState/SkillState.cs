@@ -16,7 +16,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.Player.Skills.GetWeaponInfo(WeaponStateInstance.Weapon);
+                return PlayerStateInstance.Player.Skills.GetWeaponInfo(WeaponStateInstance.WeaponInstance);
             }
 
         }
