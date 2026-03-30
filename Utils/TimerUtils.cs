@@ -55,4 +55,43 @@ namespace RealismCommonLib.Utils
             }
         }
     }
+
+    public class DelayTimer
+    {
+        private readonly float _duration;
+        private float _elapsed;
+        private bool _active;
+
+        public DelayTimer(float duration)
+        {
+            _duration = duration;
+        }
+
+        public void Start()
+        {
+            _elapsed = 0f;
+            _active = true;
+        }
+
+        public void Stop()
+        {
+            _active = false;
+        }
+
+        public bool Update()
+        {
+            if (!_active)
+                return false;
+
+            _elapsed += Time.deltaTime;
+
+            if (_elapsed >= _duration)
+            {
+                _active = false;
+                return true;
+            }
+
+            return false;
+        }
+    }
 }

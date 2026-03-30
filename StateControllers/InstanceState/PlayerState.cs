@@ -159,10 +159,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
             Player.ProceduralWeaponAnimation.method_23();
         }
 
+        //TODO this should not be opionated, should only calculate the raw % stamina
+        //modules can work out factors based on this.
         private void CalcStaminaFactors()
         {
-            ModLogger.LogWarning("SkillStateInstance null " + (SkillStateInstance == null) + "  _player.Physical null " + (Player.Physical == null));
-
             if (Player || Player.Physical == null) return; 
 
             float remainArmStamPercent = Mathf.Min(Player.Physical.HandsStamina.Current / Player.Physical.HandsStamina.TotalCapacity * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);

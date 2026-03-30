@@ -62,7 +62,6 @@ namespace RealismCommonLib.Patches
                     InputEvents.RaiseScrollInput();
                     break;
                 case ECommand.WeaponMounting:
-                    Plugin.ModLogger.LogWarning("WeaponMounting input");
                     InputEvents.RaiseWeaponMountingInput();
                     break;
                 case ECommand.ToggleGoggles:
@@ -96,7 +95,6 @@ namespace RealismCommonLib.Patches
         [PatchPrefix]
         private static bool PatchPrefix(InputClass1 __instance, ECommand command)
         {
-            Plugin.ModLogger.LogWarning("InputClass1 input");
             return InputChecker.RunInputPipeline(command);
         }
     }
@@ -111,7 +109,6 @@ namespace RealismCommonLib.Patches
         [PatchPrefix]
         private static bool PatchPrefix(InputClass2 __instance, ECommand command)
         {
-            Plugin.ModLogger.LogWarning("InputClass2 input");
             return InputChecker.RunInputPipeline(command);
         }
     }
