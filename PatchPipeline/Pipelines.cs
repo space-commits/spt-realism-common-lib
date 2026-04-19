@@ -18,13 +18,13 @@ namespace RealismCommonLib.PatchPipeline
 
     public static class Pipelines
     {
-        // 1) Cancel pipelines
+        // Cancel pipelines
         public static readonly PatchVetoPipeline<InputContext> InputVetoPipeline = new();
 
-        // 3) Override pipelines
+        // Override pipelines
         public static readonly PatchOveridePipeline<InputContext> InputOverridePipeline = new();
 
-        // 4) Override behavior handlers
+        // Override behavior handlers
         public static readonly PatchOverrideHandler<InputContext> InputOverrideHandler = new();
     }
 }

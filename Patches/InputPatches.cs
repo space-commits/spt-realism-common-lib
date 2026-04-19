@@ -13,71 +13,77 @@ namespace RealismCommonLib.Patches
     {
         private static ECommand? _lastCommand;
         private static long _lastCommandTicks;
-        private const int DUPLICATE_THRESHOLD_MS = 20;
+        private const int DUPLICATE_THRESHOLD_MS = 15; //TODO: find lowest possible threshold
 
         public static bool RunInputPipeline(ECommand command)
         {
             var now = Environment.TickCount;
 
-            if (_lastCommand == command && (now - _lastCommandTicks) < DUPLICATE_THRESHOLD_MS)
-                return true;
-
+            //both input methods fire when any key is inputted, need to avoid invoking events twice for single input
+            bool isDuplicate = _lastCommand == command && (now - _lastCommandTicks) < DUPLICATE_THRESHOLD_MS;
+            
             _lastCommand = command;
             _lastCommandTicks = now;
 
             var inputCtx = new InputContext(command);
 
+            //Don't allow input to do anything at all
             if (Pipelines.InputVetoPipeline.ShouldVeto(inputCtx))
                 return false;
 
-            switch (command)
-            {
-                case ECommand.SelectFirstPrimaryWeapon:
-                case ECommand.SelectSecondPrimaryWeapon:
-                case ECommand.QuickSelectSecondaryWeapon:
-                case ECommand.SelectSecondaryWeapon:
-                    InputEvents.RaiseWeaponSwapInput();
-                    break;
-                case ECommand.ToggleStepLeft:
-                case ECommand.ToggleStepRight:
-                case ECommand.ReturnFromRightStep:
-                case ECommand.ReturnFromLeftStep:
-                    InputEvents.RaiseToggleStepOutInput();
-                    break;
-                case ECommand.ToggleProne:
-                case ECommand.ToggleDuck:
-                    InputEvents.RaiseChangeStanceInput();
-                    break;
-                case ECommand.LeftStanceToggle:
-                    InputEvents.RaiseToggleLeftStanceInput();
-                    break;
-                case ECommand.ToggleBreathing:
-                    InputEvents.RaiseToggleBreathingInput();
-                    break;
-                case ECommand.ToggleShooting:
-                    InputEvents.RaiseToggleShootingInput();
-                    break;
-                case ECommand.ScrollNext:
-                case ECommand.ScrollPrevious:
-                    InputEvents.RaiseScrollInput();
-                    break;
-                case ECommand.WeaponMounting:
-                    InputEvents.RaiseWeaponMountingInput();
-                    break;
-                case ECommand.ToggleGoggles:
-                    InputEvents.RaiseToggleGogglesInput();
-                    break;
-                case ECommand.ChangeScope:
-                    InputEvents.RaiseChangeScopeInput();
-                    break;
-                case ECommand.ChangeScopeMagnification:
-                    InputEvents.RaiseChangeScopeMagnificationInput();
-                    break;
-            }
+            if (!isDuplicate)
+                switch (command)
+                {
+                    case ECommand.SelectFirstPrimaryWeapon:
+                    case ECommand.SelectSecondPrimaryWeapon:
+                    case ECommand.QuickSelectSecondaryWeapon:
+                    case ECommand.SelectSecondaryWeapon:
+                        InputEvents.RaiseWeaponSwapInput();
+                        break;
+                    case ECommand.ToggleStepLeft:
+                    case ECommand.ToggleStepRight:
+                    case ECommand.ReturnFromRightStep:
+                    case ECommand.ReturnFromLeftStep:
+                        InputEvents.RaiseToggleStepOutInput();
+                        break;
+                    case ECommand.ToggleProne:
+                    case ECommand.ToggleDuck:
+                        InputEvents.RaiseChangeStanceInput();
+                        break;
+                    case ECommand.LeftStanceToggle:
+                        InputEvents.RaiseToggleLeftStanceInput();
+                        break;
+                    case ECommand.ToggleBreathing:
+                        InputEvents.RaiseToggleBreathingInput();
+                        break;
+                    case ECommand.ToggleShooting:
+                        InputEvents.RaiseToggleShootingInput();
+                        break;
+                    case ECommand.ScrollNext:
+                    case ECommand.ScrollPrevious:
+                        InputEvents.RaiseScrollInput();
+                        break;
+                    case ECommand.WeaponMounting:
+                        InputEvents.RaiseWeaponMountingInput();
+                        break;
+                    case ECommand.ToggleGoggles:
+                        InputEvents.RaiseToggleGogglesInput();
+                        break;
+                    case ECommand.ChangeScope:
+                        InputEvents.RaiseChangeScopeInput();
+                        break;
+                    case ECommand.ChangeScopeMagnification:
+                        InputEvents.RaiseChangeScopeMagnificationInput();
+                        break;
+                }
 
+
+            //From user POV original input ran above, but the executed logic is overriden
             if (Pipelines.InputOverridePipeline.ShouldOverride(inputCtx))
             {
-                Pipelines.InputOverrideHandler.RunOverrides(inputCtx);
+                if (!isDuplicate)
+                    Pipelines.InputOverrideHandler.RunOverrides(inputCtx);
+
                 return false; 
             }
 
