@@ -51,6 +51,13 @@ namespace RealismCommonLib
         {
             GetFps();
             FPSFactor = GetFPSFactor();
+
+            RealismCommonLib.Utils.CurveDrawer.HandleInput();
+        }
+
+        void OnGUI()
+        {
+            RealismCommonLib.Utils.CurveDrawer.DrawGUI();
         }
 
         void EnablePatches() 
