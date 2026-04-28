@@ -104,12 +104,15 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             float baseSpeed = ReloadStateInstance.GetBaseMagReloadSpeed();
             float modifier = handler.Apply(configModifier);
-            return Mathf.Clamp(modifier * baseSpeed, 0.5f, 1.8f); //replace with per-weapon min/max if attachment module is installed
+            float finalSpeed = Mathf.Clamp(modifier * baseSpeed, 0.5f, 1.8f);
+
+            if (PluginConfig.EnableReloadLogging.Value) ModLogger.LogWarning($"Final mag reload speed {finalSpeed}");
+            return finalSpeed; //TODO: replace with per-weapon min/max if attachment module is installed?
         }
 
         public float GetBaseMagReloadSpeed()
         {
-            float config = IsQuickReloading ? PluginConfig.QuickReloadSpeedMulti.Value : PluginConfig.GlobalReloadSpeedMulti.Value;
+            float config = IsQuickReloading ? PluginConfig.QuickReloadSpeedMulti.Value : PluginConfig.GlobalMagReloadSpeedMulti.Value;
             return StatModifiers.MagReloadSpeed.Apply(config);
         }
     }

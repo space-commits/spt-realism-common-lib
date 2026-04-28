@@ -44,7 +44,7 @@ namespace RealismCommonLib
         //reloading
         public static ConfigEntry<float> PistolGlobalAimSpeedModifier { get; set; }
         public static ConfigEntry<float> GlobalAimSpeedModifier { get; set; }
-        public static ConfigEntry<float> GlobalReloadSpeedMulti { get; set; }
+        public static ConfigEntry<float> GlobalMagReloadSpeedMulti { get; set; }
         public static ConfigEntry<float> GlobalFixSpeedMulti { get; set; }
         public static ConfigEntry<float> GlobalUBGLReloadMulti { get; set; }
         public static ConfigEntry<float> GlobalRechamberSpeedMulti { get; set; }
@@ -99,7 +99,7 @@ namespace RealismCommonLib
 
             GlobalAimSpeedModifier = config.Bind<float>(weaponSpeed, "Aim Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 200 }));
             PistolGlobalAimSpeedModifier = config.Bind<float>(weaponSpeed, "Pistol Aim Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 100}));
-            GlobalReloadSpeedMulti = config.Bind<float>(weaponSpeed, "Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 15}));
+            GlobalMagReloadSpeedMulti = config.Bind<float>(weaponSpeed, "Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 15}));
             GlobalFixSpeedMulti = config.Bind<float>(weaponSpeed, "Malfunction Fix Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 14}));
             GlobalUBGLReloadMulti = config.Bind<float>(weaponSpeed, "UBGL Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 13, IsAdvanced = true}));
             RechamberPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Rechamber Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 12, IsAdvanced = true}));

@@ -96,6 +96,11 @@ namespace RealismCommonLib
             new ReloadWithAmmoPatch().Enable();
             new ReloadBarrelsPatch().Enable();
             new OnMagInsertedPatch().Enable();
+            new CanStartReloadPatch().Enable();
+            new SetMagTypeCurrentPatch().Enable();
+            new SetMagTypeNewPatch().Enable();
+            new SetMagInWeaponPatch().Enable();
+            new SetSpeedParametersPatch().Enable();
         }
 
         void InstantiateInstanceControllers()

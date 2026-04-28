@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Newtonsoft.Json;
+using System.IO;
+using System.Reflection;
 
 namespace RealismCommonLib.Utils
 {
@@ -81,7 +84,6 @@ namespace RealismCommonLib.Utils
         public static CurveAxis CurrentAxis = CurveAxis.X;
 
         private static Dictionary<string, Vector3Curve> Curves = new();
-        private static string CurrentCurveName = "Curve_0";
 
         private static Vector2 ScrollPos;
         private static Rect WindowRect = new Rect(50, 50, 400, 650);
@@ -89,32 +91,54 @@ namespace RealismCommonLib.Utils
 
         public static bool ShowUI = false;
 
-        private static string KeyTimeStr = "0";
-        private static string KeyValueStr = "0";
-        private static string InTangentStr = "0";
-        private static string OutTangentStr = "0";
-        private static string KeyIndexStr = "-1";
-
         private static float KeyTime = 0f;
         private static float KeyValue = 0f;
         private static float InTangent = 0f;
         private static float OutTangent = 0f;
         private static int KeyIndex = -1;
 
+        private static string SelectedCurveName = "Curve_0";
+        private static CurveAxis SelectedAxis = CurveAxis.X;
+        private static int SelectedKeyIndex = -1;
+
+        // string buffers (fix input issues)
+        private static string TimeStr = "0";
+        private static string ValueStr = "0";
+        private static string InTanStr = "0";
+        private static string OutTanStr = "0";
+
         static CurveDrawer()
         {
-            Curves[CurrentCurveName] = new Vector3Curve();
+            LoadFromFile();
         }
 
-        private static Vector3Curve CurrentCurve
-        {
-            get
-            {
-                if (!Curves.ContainsKey(CurrentCurveName))
-                    Curves[CurrentCurveName] = new Vector3Curve();
+        private static Vector3Curve CurrentCurve => Curves[SelectedCurveName];
 
-                return Curves[CurrentCurveName];
-            }
+        private static AnimationCurve GetActiveCurve()
+        {
+            return SelectedAxis switch
+            {
+                CurveAxis.X => CurrentCurve.XCurve,
+                CurveAxis.Y => CurrentCurve.YCurve,
+                CurveAxis.Z => CurrentCurve.ZCurve,
+                _ => CurrentCurve.XCurve
+            };
+        }
+
+        private static void ResetEditorFields()
+        {
+            TimeStr = "0";
+            ValueStr = "0";
+            InTanStr = "0";
+            OutTanStr = "0";
+        }
+
+        private static void LoadKeyToEditor(Keyframe k)
+        {
+            TimeStr = k.time.ToString();
+            ValueStr = k.value.ToString();
+            InTanStr = k.inTangent.ToString();
+            OutTanStr = k.outTangent.ToString();
         }
 
         public static Vector3Curve? GetCurve(string name)
@@ -162,25 +186,26 @@ namespace RealismCommonLib.Utils
         // -------------------------
         private static void DrawContents()
         {
-            GUILayout.Space(5);
             GUILayout.Label("=== Curve Editor ===");
 
-            GUILayout.Label($"Current: {CurrentCurveName}");
-
             // -------------------------
-            // Curve Selection
+            // CURVE SELECTION
             // -------------------------
             GUILayout.Space(10);
             GUILayout.Label("Curves:");
 
-            var curveNames = Curves.Keys.ToArray();
-            int currentIndex = Array.IndexOf(curveNames, CurrentCurveName);
-
-            int newIndex = GUILayout.SelectionGrid(currentIndex, curveNames, 1);
-
-            if (newIndex >= 0 && newIndex < curveNames.Length)
+            foreach (var kvp in Curves)
             {
-                CurrentCurveName = curveNames[newIndex];
+                bool isSelected = kvp.Key == SelectedCurveName;
+
+                if (GUILayout.Toggle(isSelected, kvp.Key, "Button"))
+                {
+                    if (SelectedCurveName != kvp.Key)
+                    {
+                        SelectedCurveName = kvp.Key;
+                        SelectedKeyIndex = -1;
+                    }
+                }
             }
 
             GUILayout.Space(5);
@@ -189,101 +214,162 @@ namespace RealismCommonLib.Utils
             {
                 string newName = $"Curve_{Curves.Count}";
                 Curves[newName] = new Vector3Curve();
-                CurrentCurveName = newName;
+                SelectedCurveName = newName;
             }
 
             if (GUILayout.Button("Delete Curve") && Curves.Count > 1)
             {
-                Curves.Remove(CurrentCurveName);
-                CurrentCurveName = Curves.Keys.First();
+                Curves.Remove(SelectedCurveName);
+                SelectedCurveName = Curves.Keys.First();
+                SelectedKeyIndex = -1;
             }
 
             // -------------------------
-            // Axis Selection
+            // AXIS SELECTION
             // -------------------------
             GUILayout.Space(10);
             GUILayout.Label("Axis:");
 
-            CurrentAxis = (CurveAxis)GUILayout.SelectionGrid(
-                (int)CurrentAxis,
-                new[] { "X", "Y", "Z" },
-                1
-            );
+            foreach (CurveAxis axis in Enum.GetValues(typeof(CurveAxis)))
+            {
+                bool selected = axis == SelectedAxis;
+
+                if (GUILayout.Toggle(selected, axis.ToString(), "Button"))
+                {
+                    if (SelectedAxis != axis)
+                    {
+                        SelectedAxis = axis;
+                        SelectedKeyIndex = -1;
+                    }
+                }
+            }
 
             // -------------------------
-            // Key Controls
+            // KEYFRAME LIST
             // -------------------------
             GUILayout.Space(10);
-            GUILayout.Label("Key Controls:");
+            GUILayout.Label("Keyframes:");
 
-            if (GUILayout.Button("Add / Override Key"))
+            var curve = GetActiveCurve();
+
+            for (int i = 0; i < curve.length; i++)
             {
-                AddOrOverrideKeyByIndex();
+                var k = curve[i];
+                string label = $"[{i}] t:{k.time:0.###} v:{k.value:0.###}";
+
+                bool selected = i == SelectedKeyIndex;
+
+                if (GUILayout.Toggle(selected, label, "Button"))
+                {
+                    if (SelectedKeyIndex != i)
+                    {
+                        SelectedKeyIndex = i;
+                        LoadKeyToEditor(k);
+                    }
+                }
             }
 
-            if (GUILayout.Button("Clear Current Axis"))
+            GUILayout.Space(5);
+
+            if (GUILayout.Button("Add New Key"))
             {
-                GetActiveCurve().keys = Array.Empty<Keyframe>();
+                SelectedKeyIndex = -1;
+                ResetEditorFields();
             }
 
-            if (GUILayout.Button("Clear Entire Curve"))
+            if (GUILayout.Button("Delete Selected Key") && SelectedKeyIndex >= 0)
             {
-                Curves[CurrentCurveName] = new Vector3Curve();
+                DeleteKey(SelectedKeyIndex);
+                SelectedKeyIndex = -1;
             }
 
+            // -------------------------
+            // KEYFRAME EDITOR
+            // -------------------------
             GUILayout.Space(10);
-            GUILayout.Label("Keyframe Editor");
+            GUILayout.Label("Editor:");
 
-            // TIME
             GUILayout.Label("Time");
-            KeyTimeStr = GUILayout.TextField(KeyTimeStr);
-            KeyTime = ParseFloat(KeyTimeStr, KeyTime);
+            TimeStr = GUILayout.TextField(TimeStr);
 
-            // VALUE
             GUILayout.Label("Value");
-            KeyValueStr = GUILayout.TextField(KeyValueStr);
-            KeyValue = ParseFloat(KeyValueStr, KeyValue);
+            ValueStr = GUILayout.TextField(ValueStr);
 
-            // IN TANGENT
             GUILayout.Label("In Tangent");
-            InTangentStr = GUILayout.TextField(InTangentStr);
-            InTangent = ParseFloat(InTangentStr, InTangent);
+            InTanStr = GUILayout.TextField(InTanStr);
 
-            // OUT TANGENT
             GUILayout.Label("Out Tangent");
-            OutTangentStr = GUILayout.TextField(OutTangentStr);
-            OutTangent = ParseFloat(OutTangentStr, OutTangent);
+            OutTanStr = GUILayout.TextField(OutTanStr);
 
-            // INDEX
-            GUILayout.Label("Key Index (-1 = add)");
-            KeyIndexStr = GUILayout.TextField(KeyIndexStr);
-            KeyIndex = (int)ParseFloat(KeyIndexStr, KeyIndex);
+            if (GUILayout.Button("Apply"))
+            {
+                ApplyKey();
+            }
 
             // -------------------------
-            // Logging
+            // LOGGING
             // -------------------------
             GUILayout.Space(10);
-            GUILayout.Label("Logging:");
 
             if (GUILayout.Button("Log Current Curve"))
             {
-                LogCurve(CurrentCurveName, CurrentCurve);
+                LogCurve(SelectedCurveName, CurrentCurve);
             }
 
             if (GUILayout.Button("Log ALL Curves"))
             {
                 LogAllCurves();
             }
+
+            GUILayout.Space(10);
+            GUILayout.Label("Persistence");
+
+            if (GUILayout.Button("Save Curves"))
+            {
+                SaveToFile();
+            }
+
+            if (GUILayout.Button("Reload Curves"))
+            {
+                LoadFromFile();
+            }
         }
 
-        private static float DrawFloatField(float value)
+        private static void ApplyKey()
         {
-            string text = GUILayout.TextField(value.ToString("0.###"));
+            var curve = GetActiveCurve();
 
-            if (float.TryParse(text, out float result))
-                return Mathf.Clamp(result, -1000f, 1000f);
+            float t = Parse(TimeStr);
+            float v = Parse(ValueStr);
+            float inT = Parse(InTanStr);
+            float outT = Parse(OutTanStr);
 
-            return value;
+            var key = new Keyframe(t, v, inT, outT);
+
+            if (SelectedKeyIndex >= 0 && SelectedKeyIndex < curve.length)
+            {
+                curve.MoveKey(SelectedKeyIndex, key);
+            }
+            else
+            {
+                curve.AddKey(key);
+            }
+
+            curve.keys = curve.keys.OrderBy(k => k.time).ToArray();
+        }
+
+        private static void DeleteKey(int index)
+        {
+            var curve = GetActiveCurve();
+
+            var keys = curve.keys.ToList();
+            keys.RemoveAt(index);
+            curve.keys = keys.ToArray();
+        }
+
+        private static float Parse(string s)
+        {
+            return float.TryParse(s, out var v) ? v : 0f;
         }
 
         private static float ParseFloat(string s, float fallback)
@@ -292,51 +378,6 @@ namespace RealismCommonLib.Utils
                 return result;
 
             return fallback;
-        }
-
-        // -------------------------
-        // CURVE LOGIC
-        // -------------------------
-        private static AnimationCurve GetActiveCurve()
-        {
-            return CurrentAxis switch
-            {
-                CurveAxis.X => CurrentCurve.XCurve,
-                CurveAxis.Y => CurrentCurve.YCurve,
-                CurveAxis.Z => CurrentCurve.ZCurve,
-                _ => CurrentCurve.XCurve
-            };
-        }
-
-        private static void AddOrOverrideKeyByIndex()
-        {
-            var curve = GetActiveCurve();
-
-            int index = KeyIndex;
-
-            var keyFrame = new Keyframe(
-                KeyTime,
-                KeyValue,
-                InTangent,
-                OutTangent
-            );
-
-            if (index < 0)
-            {
-                curve.AddKey(keyFrame);
-            }
-            else if (index < curve.length)
-            {
-                curve.MoveKey(index, keyFrame);
-            }
-            else
-            {
-                curve.AddKey(keyFrame);
-            }
-
-            curve.keys = curve.keys.OrderBy(k => k.time).ToArray();
-
-            LogCurve(CurrentCurveName, CurrentCurve);
         }
 
         // -------------------------
@@ -398,5 +439,162 @@ namespace RealismCommonLib.Utils
 
             return sb.ToString();
         }
+
+        private static string FilePath
+        {
+            get
+            {
+                string pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                return Path.Combine(pluginPath, "curves.json");
+            }
+        }
+
+        public static void SaveToFile()
+        {
+            try
+            {
+                var file = new CurveFile();
+
+                foreach (var kvp in Curves)
+                {
+                    file.curves[kvp.Key] = new SerializableVector3Curve(kvp.Value);
+                }
+
+                var settings = new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented
+                };
+
+                string json = JsonConvert.SerializeObject(file, settings);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+
+                File.WriteAllText(FilePath, json);
+
+                Plugin.ModLogger.LogInfo($"Saved curves to {FilePath}");
+            }
+            catch (Exception e)
+            {
+                Plugin.ModLogger.LogError($"Save failed: {e}");
+            }
+        }
+
+        public static void LoadFromFile()
+        {
+            try
+            {
+                if (!File.Exists(FilePath))
+                {
+                    Plugin.ModLogger.LogWarning("No curve file found, creating new.");
+                    return;
+                }
+
+                string json = File.ReadAllText(FilePath);
+
+                var file = JsonConvert.DeserializeObject<CurveFile>(json);
+
+                if (file == null || file.curves == null)
+                {
+                    Plugin.ModLogger.LogWarning("Invalid curve file.");
+                    return;
+                }
+
+                Curves.Clear();
+
+                foreach (var kvp in file.curves)
+                {
+                    Curves[kvp.Key] = kvp.Value.ToVector3Curve();
+                }
+
+                if (Curves.Count > 0)
+                    SelectedCurveName = Curves.Keys.First();
+
+                Plugin.ModLogger.LogInfo($"Loaded curves from {FilePath}");
+            }
+            catch (Exception e)
+            {
+                Plugin.ModLogger.LogError($"Load failed: {e}");
+            }
+        }
+    }
+
+    [Serializable]
+    public class SerializableKeyframe
+    {
+        public float time;
+        public float value;
+        public float inTangent;
+        public float outTangent;
+
+        public SerializableKeyframe() { }
+
+        public SerializableKeyframe(Keyframe k)
+        {
+            time = k.time;
+            value = k.value;
+            inTangent = k.inTangent;
+            outTangent = k.outTangent;
+        }
+
+        public Keyframe ToKeyframe()
+        {
+            return new Keyframe(time, value, inTangent, outTangent);
+        }
+    }
+
+    [Serializable]
+    public class SerializableCurve
+    {
+        public List<SerializableKeyframe> keys = new();
+
+        public SerializableCurve() { }
+
+        public SerializableCurve(AnimationCurve curve)
+        {
+            foreach (var k in curve.keys)
+                keys.Add(new SerializableKeyframe(k));
+        }
+
+        public AnimationCurve ToAnimationCurve()
+        {
+            var curve = new AnimationCurve();
+
+            foreach (var k in keys)
+                curve.AddKey(k.ToKeyframe());
+
+            return curve;
+        }
+    }
+
+    [Serializable]
+    public class SerializableVector3Curve
+    {
+        public SerializableCurve X = new();
+        public SerializableCurve Y = new();
+        public SerializableCurve Z = new();
+
+        public SerializableVector3Curve() { }
+
+        public SerializableVector3Curve(Vector3Curve curve)
+        {
+            X = new SerializableCurve(curve.XCurve);
+            Y = new SerializableCurve(curve.YCurve);
+            Z = new SerializableCurve(curve.ZCurve);
+        }
+
+        public Vector3Curve ToVector3Curve()
+        {
+            return new Vector3Curve(
+                X.ToAnimationCurve(),
+                Y.ToAnimationCurve(),
+                Z.ToAnimationCurve()
+            );
+        }
+    }
+
+    [Serializable]
+    public class CurveFile
+    {
+        public Dictionary<string, SerializableVector3Curve> curves = new();
     }
 }
