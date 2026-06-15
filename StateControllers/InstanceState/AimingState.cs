@@ -22,7 +22,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.ProceduralWeaponAnimation.IsAiming;
+                return PlayerStateInstance.PWA.IsAiming;
             }
         }
     }

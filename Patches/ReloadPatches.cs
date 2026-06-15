@@ -320,8 +320,8 @@ namespace RealismCommonLib.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            _playerField = AccessTools.Field(typeof(WeaponStatSubclass), "player_0");
-            faField = AccessTools.Field(typeof(WeaponStatSubclass), "firearmsAnimator_0");
+            _playerField = AccessTools.Field(typeof(WeaponStatSubclass), "Player_0");
+            faField = AccessTools.Field(typeof(WeaponStatSubclass), "FirearmsAnimator_0");
             return typeof(MagReloadClass).GetMethod("Start", new Type[] { typeof(WeaponEventHandlerClass), typeof(Callback) });
         }
 

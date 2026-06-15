@@ -56,7 +56,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        public ProceduralWeaponAnimation ProceduralWeaponAnimation
+        public ProceduralWeaponAnimation PWA
         {
             get
             {
@@ -163,7 +163,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         //modules can work out factors based on this.
         private void CalcStaminaFactors()
         {
-            if (Player || Player.Physical == null) return; 
+            if (Player || Player.Physical == null) return;
 
             float remainArmStamPercent = Mathf.Min(Player.Physical.HandsStamina.Current / Player.Physical.HandsStamina.TotalCapacity * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
             BaseStaminaPerc = Player.Physical.Stamina.Current / Player.Physical.Stamina.TotalCapacity;
