@@ -75,9 +75,10 @@ namespace RealismCommonLib
             //Player
             new OnItemAddedOrRemovedPatch().Enable();
             new PlayerInitPatch().Enable();
-            new PlayerWalkSpeedLimitPatch().Enable();
-            new PlayerSprintSpeedLimitPatch().Enable();
-            new OnWeightUpdatedPatch().Enable();
+            new ClampedSpeedPatch().Enable();
+            new ApplyMotionPatch().Enable();
+            new SetCharacterMovementSpeedPatch().Enable();
+            new SetCharacterSprintSpeedPatch().Enable();
 
             //PWA Patches
             new UpdateWeaponVariablesPatch().Enable();

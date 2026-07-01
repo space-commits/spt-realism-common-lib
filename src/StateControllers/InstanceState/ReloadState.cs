@@ -88,7 +88,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
                     float config = PluginConfig.InternalMagReloadMulti.Value;
                     float modifier = Mathf.Clamp(StatModifiers.InternalReloadModifier.Apply(config), MIN_INTERNAL_RELOAD_SPEED, MAX_INTERNAL_RELOAD_SPEED);
 
-                    PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(config);
+                    PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(modifier);
 
                     if (PluginConfig.EnableReloadLogging.Value) ModLogger.LogWarning("IsAttemptingToReloadInternalMag");
                 }

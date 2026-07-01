@@ -106,10 +106,11 @@ namespace RealismCommonLib.Utils
         private static string ValueStr = "0";
         private static string InTanStr = "0";
         private static string OutTanStr = "0";
+        private static string SaveDirectory = PluginConfig.CurveFilePath.Value;
 
         static CurveDrawer()
         {
-            LoadFromFile();
+            LoadFromFile(SaveDirectory);
         }
 
         private static Vector3Curve CurrentCurve => Curves[SelectedCurveName];
@@ -326,12 +327,12 @@ namespace RealismCommonLib.Utils
 
             if (GUILayout.Button("Save Curves"))
             {
-                SaveToFile();
+                SaveToFile(SaveDirectory);
             }
 
             if (GUILayout.Button("Reload Curves"))
             {
-                LoadFromFile();
+                LoadFromFile(SaveDirectory);
             }
         }
 
@@ -440,16 +441,21 @@ namespace RealismCommonLib.Utils
             return sb.ToString();
         }
 
-        private static string FilePath
+        private static string PluginDirectory
         {
             get
             {
-                string pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                return Path.Combine(pluginPath, "curves.json");
+                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
             }
         }
 
-        public static void SaveToFile()
+        private static string GetFilePath(string directory)
+        {
+            var saveDir = string.IsNullOrWhiteSpace(directory) ? PluginDirectory : directory;
+            return Path.Combine(saveDir, "curves.json");
+        }
+
+        public static void SaveToFile(string directory)
         {
             try
             {
@@ -466,12 +472,13 @@ namespace RealismCommonLib.Utils
                 };
 
                 string json = JsonConvert.SerializeObject(file, settings);
+                string filePath = GetFilePath(directory);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
 
-                File.WriteAllText(FilePath, json);
+                File.WriteAllText(filePath, json);
 
-                Plugin.ModLogger.LogInfo($"Saved curves to {FilePath}");
+                Plugin.ModLogger.LogInfo($"Saved curves to {filePath}");
             }
             catch (Exception e)
             {
@@ -479,17 +486,19 @@ namespace RealismCommonLib.Utils
             }
         }
 
-        public static void LoadFromFile()
+        public static void LoadFromFile(string directory)
         {
             try
             {
-                if (!File.Exists(FilePath))
+                string filePath = GetFilePath(directory);
+
+                if (!File.Exists(filePath))
                 {
                     Plugin.ModLogger.LogWarning("No curve file found, creating new.");
                     return;
                 }
 
-                string json = File.ReadAllText(FilePath);
+                string json = File.ReadAllText(filePath);
 
                 var file = JsonConvert.DeserializeObject<CurveFile>(json);
 
@@ -509,7 +518,7 @@ namespace RealismCommonLib.Utils
                 if (Curves.Count > 0)
                     SelectedCurveName = Curves.Keys.First();
 
-                Plugin.ModLogger.LogInfo($"Loaded curves from {FilePath}");
+                Plugin.ModLogger.LogInfo($"Loaded curves from {filePath}");
             }
             catch (Exception e)
             {

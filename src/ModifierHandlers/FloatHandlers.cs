@@ -56,10 +56,10 @@ namespace RealismCommonLib.ModifierHandlers
         public static readonly FloatMultiplierSet InternalReloadModifier = new();
 
         //Movement speed
-        public static readonly FloatMultiplierSet MaxWalkSpeedModifier = new();
-        public static readonly FloatMultiplierSet MaxSprintSpeedModifier = new();
+        public static readonly FloatMultiplierSet WalkSpeedModifier = new();
+        public static readonly FloatMultiplierSet SprintSpeedModifier = new();
         public static readonly FloatMultiplierSet SprintAccelModifier = new();
         public static readonly FloatMultiplierSet PreSprintAccelModifier = new();
-    }
 
+    }
 }

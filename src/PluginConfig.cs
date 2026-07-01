@@ -118,10 +118,12 @@ namespace RealismCommonLib
         }
 
         public static ConfigEntry<KeyboardShortcut> ToggleCurveEditorKey;
+        public static ConfigEntry<string> CurveFilePath;
 
         public static void InitTempBindings(ConfigFile config)
         {
             ToggleCurveEditorKey = config.Bind("Curve Builder", "Toggle Editor Key", new KeyboardShortcut(KeyCode.F6), "Toggle in-game curve editor");
+            CurveFilePath = config.Bind("Curve Builder", "Curve Filepath", "", "Leave blank to save and load curves in plugin folder");
         }
     }
 }
