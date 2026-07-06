@@ -27,7 +27,8 @@ namespace RealismCommonLib.StateControllers.GlobalState
 
         void Update()
         {
-            if (_checkGate.Ready()) CheckIsReady();
+            if (_checkGate.Ready()) 
+               CheckIsReady();
         }
 
         public Player? GetYourPlayer()

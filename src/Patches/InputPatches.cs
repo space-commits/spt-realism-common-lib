@@ -7,12 +7,16 @@ using System.Linq;
 using System.Reflection;
 using InputClass1 = Class1730;
 using InputClass2 = Class1728;
+using EFT;
+using static RealismCommonLib.Plugin;
+using HarmonyLib;
+
 
 namespace RealismCommonLib.Patches
 {
     internal static class InputChecker
     {
-        public static ECommand[] Input1Commands = new ECommand[]
+        public static ECommand[] Input1PrefixCommands = new ECommand[]
         {
             ECommand.SelectFirstPrimaryWeapon,
             ECommand.SelectSecondPrimaryWeapon,
@@ -22,13 +26,17 @@ namespace RealismCommonLib.Patches
             ECommand.ReturnFromRightStep,
             ECommand.ReturnFromLeftStep,
             ECommand.ChamberUnload,
-            ECommand.ToggleGoggles,
             ECommand.ChangeScope,
             ECommand.ChangeScopeMagnification,
             ECommand.LeftStanceToggle,
             ECommand.ToggleBreathing,
             ECommand.ToggleBipods,
             ECommand.ToggleShooting
+        };
+
+        //for commands that aren't going to be vetoed, and need to game's logic to run before raising event.
+        public static ECommand[] Input1PostfixCommands = new ECommand[]
+        {
         };
 
         public static ECommand[] Input2Commands = new ECommand[]
@@ -40,16 +48,8 @@ namespace RealismCommonLib.Patches
             ECommand.WeaponMounting,
         };
 
-        public static bool RunInputPipeline(ECommand command)
+        public static void RaiseEvents(ECommand command)
         {
-            var now = Environment.TickCount;
-
-            var inputCtx = new InputContext(command);
-
-            //Don't allow input to do anything at all
-            if (Pipelines.InputVetoPipeline.ShouldVeto(inputCtx))
-                return false;
-
             switch (command)
             {
                 case ECommand.SelectFirstPrimaryWeapon:
@@ -94,14 +94,23 @@ namespace RealismCommonLib.Patches
                     InputEvents.RaiseChangeScopeMagnificationInput();
                     break;
             }
+        }
 
+        public static bool RunPrefixInputPipeline(ECommand command)
+        {
+            var inputCtx = new InputContext(command);
 
+            //Don't allow input to do anything at all
+            if (Pipelines.InputVetoPipeline.ShouldVeto(inputCtx))
+                return false;
+
+            RaiseEvents(command);
 
             //From user POV original input ran above, but the executed logic is overriden
             if (Pipelines.InputOverridePipeline.ShouldOverride(inputCtx))
             {
                 Pipelines.InputOverrideHandler.RunOverrides(inputCtx);
-                return false; 
+                return false;
             }
 
             return true;
@@ -116,15 +125,23 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix(InputClass1 __instance, ECommand command)
+        private static bool PatchPrefix(ECommand command)
         {
-            if (InputChecker.Input1Commands.Contains(command))
-                return InputChecker.RunInputPipeline(command);
+            if (InputChecker.Input1PrefixCommands.Contains(command))
+                return InputChecker.RunPrefixInputPipeline(command);
 
-            return true;      
+            return true;
         }
+
+        //for raising events after game logic runs
+        // [PatchPostfix]
+        // private static void PatchPostfix(ECommand command)
+        // {
+        //     if (InputChecker.Input1PostfixCommands.Contains(command))
+        //         InputChecker.RaiseEvents(command);
+        // }
     }
-     
+
     public class KeyInputPatch2 : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -133,12 +150,69 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix(InputClass2 __instance, ECommand command)
+        private static bool PatchPrefix(ECommand command)
         {
             if (InputChecker.Input2Commands.Contains(command))
-                return InputChecker.RunInputPipeline(command);
+                return InputChecker.RunPrefixInputPipeline(command);
 
             return true;
+        }
+    }
+
+
+    /// <summary>
+    /// Patch to detect when the player toggles NVG on or off. Internally it's an asynchronous call when toggling head device,
+    /// so need to use these patches to know that they were actually toggled.
+    /// </summary>
+    public class NVGTogglePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), nameof(Player.PlayNightVisionSound));
+
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(Player __instance)
+        {
+            if (!__instance.IsYourPlayer || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
+                return;
+
+            InputEvents.RaiseToggleGogglesInput();
+        }
+    }
+
+    public class ThermalTogglePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), nameof(Player.PlayThermalVisionSound));
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(Player __instance)
+        {
+            if (!__instance.IsYourPlayer || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
+                return;
+
+            InputEvents.RaiseToggleGogglesInput();
+        }
+    }
+
+    public class FaceShieldTogglePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), nameof(Player.PlayFaceShieldSound));
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(Player __instance)
+        {
+            if (!__instance.IsYourPlayer || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
+                return;
+
+            InputEvents.RaiseToggleGogglesInput();
         }
     }
 }

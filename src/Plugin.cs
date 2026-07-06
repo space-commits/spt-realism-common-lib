@@ -65,6 +65,9 @@ namespace RealismCommonLib
             //Input
             new KeyInputPatch1().Enable();
             new KeyInputPatch2().Enable();
+            new NVGTogglePatch().Enable();
+            new ThermalTogglePatch().Enable();
+            new FaceShieldTogglePatch().Enable();
 
             //Aiming
             new ToggleAimPatch().Enable();

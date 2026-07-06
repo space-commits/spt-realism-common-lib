@@ -1,12 +1,8 @@
-﻿using BSG.CameraEffects;
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using RealismCommonLib.Events;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
 using UnityEngine;
+using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.StateControllers.InstanceState
 {
@@ -46,7 +42,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public void CheckGear()
         {
-            Player player = Plugin.PlayerStateInstance.Player;
+            if (PlayerStateInstance == null || PlayerStateInstance.Player == null || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
+                return;
+
+            Player player = PlayerStateInstance.Player;
             FaceShieldComponent fsComponent = player.FaceShieldObserver.Component;
             NightVisionComponent nvgComponent = player.NightVisionObserver.Component;
             ThermalVisionComponent thermComponent = player.ThermalVisionObserver.Component;
@@ -54,6 +53,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
             FaceShieldIsActive = fsComponent != null && (fsComponent.Togglable == null || fsComponent.Togglable.On);
             NVGIsActive = nvgComponent != null && (nvgComponent.Togglable == null || nvgComponent.Togglable.On);
             ThermalIsActive = thermComponent != null && (thermComponent.Togglable == null || thermComponent.Togglable.On);
+
+            ModLogger.LogWarning($"GearState: FaceShieldIsActive={FaceShieldIsActive}, NVGIsActive={NVGIsActive}, ThermalIsActive={ThermalIsActive}");
+
+            PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
         }
     }
 }

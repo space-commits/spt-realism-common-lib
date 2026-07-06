@@ -225,7 +225,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
         //TODO: attachment overhaul needs a way to override
         public void CheckForShoulderContact()
         {
-            _hasShoulderContact = PlayerStateInstance.Player.ProceduralWeaponAnimation._shouldMoveWeaponCloser && !IsPistol;
+            // _shouldMoveWeaponCloser=true means the weapon is compact (folded/no stock) — inverted relative to shoulder contact
+            _hasShoulderContact = !PlayerStateInstance.Player.ProceduralWeaponAnimation._shouldMoveWeaponCloser && !IsPistol;
         }
 
         //TODO: replace, refactor stance module to figure this out itself

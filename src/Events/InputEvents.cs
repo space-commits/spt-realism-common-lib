@@ -1,9 +1,5 @@
-﻿using EFT.InputSystem;
-using EFT;
-using RealismCommonLib.PatchPipeline;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.Events
 {
@@ -74,6 +70,7 @@ namespace RealismCommonLib.Events
 
         internal static void RaiseToggleGogglesInput()
         {
+            ModLogger.LogWarning("Raising ToggleGogglesInput event");
             BaseEventHandler.RaiseEvent(ToggleGogglesInput);
         }
 

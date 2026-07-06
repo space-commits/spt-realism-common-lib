@@ -225,7 +225,6 @@ namespace RealismCommonLib.Patches
         [PatchPrefix]
         private static void Prefix(PlayerAnimator __instance, ref float charaterMovementSpeed)
         {
-            Logger.LogWarning($">>>>SetCharacterMovementSpeedPatch called, speed: {charaterMovementSpeed}");
             if (Plugin.PlayerStateInstance == null) return;
             Player player = Plugin.PlayerStateInstance.Player;
             if (player == null) return;
@@ -245,7 +244,6 @@ namespace RealismCommonLib.Patches
         [PatchPrefix]
         private static void Prefix(PlayerAnimator __instance, ref float speed)
         {
-            Logger.LogWarning($">>>>SetCharacterSprintSpeedPatch called, speed: {speed}");
             if (Plugin.PlayerStateInstance == null) return;
             Player player = Plugin.PlayerStateInstance.Player;
             if (player == null) return;

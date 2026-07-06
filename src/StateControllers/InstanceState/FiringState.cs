@@ -88,7 +88,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
         //update hipfire to take NVG toggle into account
         private void UpdateHipfireState()
         {
-            PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
+            ModLogger.LogWarning("Updating hipfire state due to NVG toggle");
+            //PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
         }
 
         public void UpdateFiringState()
