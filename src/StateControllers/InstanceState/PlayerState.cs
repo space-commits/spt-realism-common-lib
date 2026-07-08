@@ -108,6 +108,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
+        internal Item PreviouslyEquippedItem { get; set; }
+
         public float BaseStaminaPerc { get; private set; }
 
         public float RemainingArmStamFactor { get; private set; }

@@ -26,7 +26,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
             PlayerEvents.OnPlayerInit += CheckGear;
             PlayerEvents.OnItemAddedOrRemoved += CheckGear;
-            InputEvents.ToggleGogglesInput += CheckGear;
+            PlayerEvents.ToggleHeadDevice += CheckGear;
             InputEvents.ChangeScopeInput += CheckGear;
             InputEvents.ChangeScopeMagnificationInput += CheckGear;
         }
@@ -35,7 +35,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             PlayerEvents.OnItemAddedOrRemoved -= CheckGear;
             PlayerEvents.OnPlayerInit -= CheckGear;
-            InputEvents.ToggleGogglesInput -= CheckGear;
+            PlayerEvents.ToggleHeadDevice -= CheckGear;
             InputEvents.ChangeScopeInput -= CheckGear;
             InputEvents.ChangeScopeMagnificationInput -= CheckGear;
         }

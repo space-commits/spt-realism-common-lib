@@ -30,7 +30,7 @@ namespace RealismCommonLib.Patches
             Player player = (Player)_playerField.GetValue(firearmController);
             if (player != null && player.IsYourPlayer && player.MovementContext.CurrentState.Name != EPlayerState.Stationary)
             {
-                PWAEvents.RaiseOnUpdateWeaponVariables(firearmController);
+                PWAEvents.RaiseOnUpdateWeaponVariables();
             }
         }
     }
@@ -61,7 +61,7 @@ namespace RealismCommonLib.Patches
                 Weapon weapon = firearmController.Weapon;
                 if (weapon != null)
                 {
-                    PWAEvents.RaiseOnPWAInitialize(firearmController);
+                    PWAEvents.RaiseOnPWAInitialize();
                 }
             }
         }

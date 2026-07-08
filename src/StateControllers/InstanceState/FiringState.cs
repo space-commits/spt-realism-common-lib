@@ -71,7 +71,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void Awake()
         {
-            InputEvents.ToggleGogglesInput += UpdateHipfireState;
+            PlayerEvents.ToggleHeadDevice += UpdateHipfireState;
         }
 
         void Update()
@@ -82,7 +82,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void OnDestroy()
         {
-            InputEvents.ToggleGogglesInput -= UpdateHipfireState;
+            PlayerEvents.ToggleHeadDevice -= UpdateHipfireState;
         }
 
         //update hipfire to take NVG toggle into account

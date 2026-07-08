@@ -25,6 +25,8 @@ namespace RealismCommonLib.Patches
             {
                 // Always allow exiting ADS; only block entering ADS
                 if (__instance.IsAiming) return true;
+                Logger.LogWarning($"Aim blocked: {!Plugin.AimStateInstance.PlayerCanAim}");
+
                 return Plugin.AimStateInstance.PlayerCanAim;
             }
             return true;

@@ -85,7 +85,7 @@ namespace RealismCommonLib.Patches
                     InputEvents.RaiseWeaponMountingInput();
                     break;
                 case ECommand.ToggleGoggles:
-                    InputEvents.RaiseToggleGogglesInput();
+                    InputEvents.RaiseToggleHeadDevice();
                     break;
                 case ECommand.ChangeScope:
                     InputEvents.RaiseChangeScopeInput();
@@ -178,7 +178,7 @@ namespace RealismCommonLib.Patches
             if (!__instance.IsYourPlayer || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
                 return;
 
-            InputEvents.RaiseToggleGogglesInput();
+            PlayerEvents.RaiseToggleHeadDevice();
         }
     }
 
@@ -195,7 +195,7 @@ namespace RealismCommonLib.Patches
             if (!__instance.IsYourPlayer || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
                 return;
 
-            InputEvents.RaiseToggleGogglesInput();
+            PlayerEvents.RaiseToggleHeadDevice();
         }
     }
 
@@ -212,7 +212,7 @@ namespace RealismCommonLib.Patches
             if (!__instance.IsYourPlayer || GameStateInstance == null || !GameStateInstance.PlayerIsInRaidOrHideout)
                 return;
 
-            InputEvents.RaiseToggleGogglesInput();
+            PlayerEvents.RaiseToggleHeadDevice();
         }
     }
 }

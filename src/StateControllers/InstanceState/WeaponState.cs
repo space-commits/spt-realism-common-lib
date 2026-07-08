@@ -8,6 +8,7 @@ using EFT.Animations;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
 using RealismCommonLib.Events;
+using System.Linq;
 
 namespace RealismCommonLib.StateControllers.InstanceState
 {
@@ -31,10 +32,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public Weapon? WeaponInstance
         {
-            get 
+            get
             {
                 if (PlayerStateInstance.FirearmController == null) return null;
-                return PlayerStateInstance.FirearmController.Item; 
+                return PlayerStateInstance.FirearmController.Item;
             }
         }
 
@@ -56,9 +57,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return 
-                    PlayerStateInstance.FirearmController != null && 
-                    PlayerStateInstance.FirearmController.HasBipod && 
+                return
+                    PlayerStateInstance.FirearmController != null &&
+                    PlayerStateInstance.FirearmController.HasBipod &&
                     PlayerStateInstance.FirearmController.BipodState;
             }
         }
@@ -205,7 +206,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        void Update() 
+        void Update()
         {
         }
 
@@ -222,11 +223,27 @@ namespace RealismCommonLib.StateControllers.InstanceState
             PWAEvents.OnPWAInitialize -= SetWeaponImmutableState;
         }
 
-        //TODO: attachment overhaul needs a way to override
-        public void CheckForShoulderContact()
+        public void CheckForShoulderContact(Weapon weapon)
         {
-            // _shouldMoveWeaponCloser=true means the weapon is compact (folded/no stock) — inverted relative to shoulder contact
-            _hasShoulderContact = !PlayerStateInstance.Player.ProceduralWeaponAnimation._shouldMoveWeaponCloser && !IsPistol;
+            bool hasShoulderContact = false;
+            IEnumerable<ProtrudableComponent> protrudableComponents = Enumerable.Empty<ProtrudableComponent>();
+            if (InteractionsHandlerClass.CanFold(weapon, out var foldable))
+            {
+                if (foldable.FoldedSlot == null)
+                {
+                    hasShoulderContact |= !foldable.Folded;
+                }
+                else if (foldable.FoldedSlot.ContainedItem != null)
+                {
+                    protrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(foldable.FoldedSlot.ContainedItem).ToArray();
+                    hasShoulderContact |= !foldable.Folded && protrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
+                }
+            }
+
+            IEnumerable<ProtrudableComponent> remainingProtrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
+            hasShoulderContact |= remainingProtrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
+
+            _hasShoulderContact = hasShoulderContact;
         }
 
         //TODO: replace, refactor stance module to figure this out itself
@@ -239,8 +256,11 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// When weapon state changes (reload, fold stock, change firemode etc), update relevant weapon state variables.
         /// Don't use componenet's weapon property as it may be null or not updated when this is called.
         /// </summary>
-        public void UpdateWeaponStateOnStateChange(FirearmController fc)
-        {  
+        public void UpdateWeaponStateOnStateChange()
+        {
+            var fc = PlayerStateInstance.FirearmController;
+            if (fc == null) return;
+
             TotalWeaponWeight = fc.Item.TotalWeight;
             WeaponLength = fc.Item.CalculateCellSize().X;
 
@@ -251,7 +271,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
                 UpdateErgoFactor();
 
                 //state
-                CheckForShoulderContact();
+                CheckForShoulderContact(fc.Item);
             }
         }
 
@@ -259,8 +279,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// For immutable weapon properties.
         /// Don't use componenet's weapon property as it may be null or not updated when this is called.
         /// </summary>
-        public void SetWeaponImmutableState(FirearmController fc)
+        public void SetWeaponImmutableState()
         {
+            var fc = PlayerStateInstance.FirearmController;
+            if (fc == null) return;
             _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
             _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
         }

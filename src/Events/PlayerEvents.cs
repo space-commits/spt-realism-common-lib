@@ -25,6 +25,14 @@ namespace RealismCommonLib.Events
 
         public static event Action? OnWeaponDraw;
 
+        public static event Action? ToggleHeadDevice;
+
+        public static event Action? OnItemEquipped;
+
+        public static event Action? OnWeaponSwap;
+
+        public static event Action? OnSwappedFromGunToItem;
+
         internal static void RaiseOnAimStateChanged()
         {
             BaseEventHandler.RaiseEvent(AimStateChanged);
@@ -53,6 +61,26 @@ namespace RealismCommonLib.Events
         internal static void RaiseOnWeaponDraw()
         {
             BaseEventHandler.RaiseEvent(OnWeaponDraw);
+        }
+
+        internal static void RaiseToggleHeadDevice()
+        {
+            BaseEventHandler.RaiseEvent(ToggleHeadDevice);
+        }
+
+        internal static void RaiseOnItemEquipped()
+        {
+            BaseEventHandler.RaiseEvent(OnItemEquipped);
+        }
+
+        internal static void RaiseOnWeaponSwap()
+        {
+            BaseEventHandler.RaiseEvent(OnWeaponSwap);
+        }
+
+        internal static void RaiseOnSwappedFromGunToItem()
+        {
+            BaseEventHandler.RaiseEvent(OnSwappedFromGunToItem);
         }
     }
 }

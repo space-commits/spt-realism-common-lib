@@ -2,6 +2,7 @@
 using RealismCommonLib.ModifierHandlers;
 using UnityEngine;
 using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.Events;
 using SPT.Reflection.Patching;
@@ -66,7 +67,7 @@ namespace RealismCommonLib.Patches
             {
                 var fc = __instance.Player_0.HandsController as Player.FirearmController;
                 if (fc == null) return;
-                PWAEvents.RaiseOnPWAInitialize(fc);
+                PWAEvents.RaiseOnPWAInitialize();
             }
         }
     }
@@ -161,6 +162,42 @@ namespace RealismCommonLib.Patches
     // 		__instance.SetCharacterMovementSpeed(__instance.RelativeSpeed * __instance.MaxSpeed * PluginConfig.test3.Value, false);
     //     }
     // }
+
+    public class SetItemInHandsPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(Player), nameof(Player.SetItemInHands));
+        }
+
+        [PatchPrefix]
+        private static void Prefix(Player __instance, Item item)
+        {
+            if (!__instance.IsYourPlayer) return;
+
+            PlayerEvents.RaiseOnItemEquipped();
+
+            Plugin.PlayerStateInstance.PreviouslyEquippedItem = item;
+
+            if (item is Weapon weapon && Plugin.PlayerStateInstance.PreviouslyEquippedItem is Weapon previousWeapon)
+            {
+                if (weapon.TemplateId != previousWeapon.TemplateId)
+                {
+                    PlayerEvents.RaiseOnWeaponSwap();
+                }
+            }
+
+            if (item is not Weapon && Plugin.PlayerStateInstance.PreviouslyEquippedItem is Weapon)
+            {
+                PlayerEvents.RaiseOnSwappedFromGunToItem();
+            }
+      
+            if (item is Weapon)
+            {
+                PlayerEvents.RaiseOnWeaponDraw();
+            }
+        }
+    }
 
     public class ApplyMotionPatch : ModulePatch
     {

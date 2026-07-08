@@ -19,9 +19,9 @@ namespace RealismCommonLib.Events
         public static event Action? ToggleShootingInput;
         public static event Action? ScrollInput;
         public static event Action? WeaponMountingInput;
-        public static event Action? ToggleGogglesInput;
         public static event Action? ChangeScopeInput;
         public static event Action? ChangeScopeMagnificationInput;
+        public static event Action? ToggleHeadDevice;
 
         internal static void RaiseWeaponSwapInput()
         {
@@ -68,12 +68,6 @@ namespace RealismCommonLib.Events
             BaseEventHandler.RaiseEvent(WeaponMountingInput);
         }
 
-        internal static void RaiseToggleGogglesInput()
-        {
-            ModLogger.LogWarning("Raising ToggleGogglesInput event");
-            BaseEventHandler.RaiseEvent(ToggleGogglesInput);
-        }
-
         internal static void RaiseChangeScopeInput()
         {
             BaseEventHandler.RaiseEvent(ChangeScopeInput);
@@ -82,6 +76,11 @@ namespace RealismCommonLib.Events
         internal static void RaiseChangeScopeMagnificationInput()
         {
             BaseEventHandler.RaiseEvent(ChangeScopeMagnificationInput);
+        }
+        
+        internal static void RaiseToggleHeadDevice()
+        {
+            BaseEventHandler.RaiseEvent(ToggleHeadDevice);
         }
 
     }
