@@ -7,8 +7,6 @@ using HarmonyLib;
 using RealismCommonLib.Events;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using static EFT.Player.FirearmController;
-
 
 namespace RealismCommonLib.Patches
 {
@@ -48,26 +46,6 @@ namespace RealismCommonLib.Patches
             else
             {
                 //TODO: raise on bot init
-            }
-        }
-    }
-
-    //trigger weapon swap
-    public class OnWeaponDrawPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(GClass2055).GetMethod("Start", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPostfix]
-        private static void PatchPostfix(GClass2055 __instance)
-        {
-            if (__instance.Player_0.IsYourPlayer)
-            {
-                var fc = __instance.Player_0.HandsController as Player.FirearmController;
-                if (fc == null) return;
-                PWAEvents.RaiseOnPWAInitialize();
             }
         }
     }
@@ -163,11 +141,11 @@ namespace RealismCommonLib.Patches
     //     }
     // }
 
-    public class SetItemInHandsPatch : ModulePatch
+    public class TryProceedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player), nameof(Player.SetItemInHands));
+            return AccessTools.Method(typeof(Player), nameof(Player.TryProceed));
         }
 
         [PatchPrefix]
@@ -175,27 +153,44 @@ namespace RealismCommonLib.Patches
         {
             if (!__instance.IsYourPlayer) return;
 
-            PlayerEvents.RaiseOnItemEquipped();
+            PlayerEvents.RaiseOnAnyItemEquipped();
+            Logger.LogWarning($"SetItemInHandsPatch: RaiseOnAnyItemEquipped");
 
-            Plugin.PlayerStateInstance.PreviouslyEquippedItem = item;
-
-            if (item is Weapon weapon && Plugin.PlayerStateInstance.PreviouslyEquippedItem is Weapon previousWeapon)
+            if (item is Weapon weapon)
             {
-                if (weapon.TemplateId != previousWeapon.TemplateId)
+                if ( Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null && weapon.TemplateId != Plugin.PlayerStateInstance.PreviouslyEquippedGunId)
                 {
                     PlayerEvents.RaiseOnWeaponSwap();
+                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnWeaponSwap");
+                }      
+                else if (Plugin.PlayerStateInstance.PreviouslyEquippedItemId != null && Plugin.PlayerStateInstance.PreviouslyEquippedGunId == null)
+                {
+                    PlayerEvents.RaiseOnSwappedFromItemToGun();
+                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnSwappedFromItemToGun");
                 }
+
+                PlayerEvents.RaiseEquippedWeapon();
+                Logger.LogWarning($"SetItemInHandsPatch: RaiseEquippedWeapon");
+
+                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = weapon.TemplateId;
+                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = null;
+            }
+            else
+            {
+                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null)
+                {
+                    PlayerEvents.RaiseOnSwappedFromGunToItem();
+                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnSwappedFromGunToItem");
+                }
+
+                PlayerEvents.RaiseEquippedNonWeaponItem();
+                Logger.LogWarning($"SetItemInHandsPatch: RaiseEquippedNonWeaponItem");
+
+                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = null;
+                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = item.TemplateId;
             }
 
-            if (item is not Weapon && Plugin.PlayerStateInstance.PreviouslyEquippedItem is Weapon)
-            {
-                PlayerEvents.RaiseOnSwappedFromGunToItem();
-            }
-      
-            if (item is Weapon)
-            {
-                PlayerEvents.RaiseOnWeaponDraw();
-            }
+            Logger.LogWarning($"SetItemInHandsPatch: item={item?.TemplateId}, previouslyEquippedItem={Plugin.PlayerStateInstance.PreviouslyEquippedItemId}, previouslyEquippedGun={Plugin.PlayerStateInstance.PreviouslyEquippedGunId}");
         }
     }
 

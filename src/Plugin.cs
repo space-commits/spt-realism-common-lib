@@ -82,7 +82,7 @@ namespace RealismCommonLib
             new ApplyMotionPatch().Enable();
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
-            new SetItemInHandsPatch().Enable();
+            new TryProceedPatch().Enable();
 
             //PWA Patches
             new UpdateWeaponVariablesPatch().Enable();

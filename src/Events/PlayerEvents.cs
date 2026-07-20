@@ -23,15 +23,22 @@ namespace RealismCommonLib.Events
 
         public static event Action? OnShotFired;
 
-        public static event Action? OnWeaponDraw;
-
         public static event Action? ToggleHeadDevice;
 
-        public static event Action? OnItemEquipped;
+        /// <summary>
+        /// Includes weapons
+        /// </summary>
+        public static event Action? OnAnyItemEquipped;
+
+        public static event Action? OnWeaponEquipped;
 
         public static event Action? OnWeaponSwap;
 
         public static event Action? OnSwappedFromGunToItem;
+
+        public static event Action? OnSwappedFromItemToGun;
+
+        public static event Action? OnNonWeaponEquipped;
 
         internal static void RaiseOnAimStateChanged()
         {
@@ -58,9 +65,9 @@ namespace RealismCommonLib.Events
             BaseEventHandler.RaiseEvent(OnShotFired);
         }
 
-        internal static void RaiseOnWeaponDraw()
+        internal static void RaiseEquippedWeapon()
         {
-            BaseEventHandler.RaiseEvent(OnWeaponDraw);
+            BaseEventHandler.RaiseEvent(OnWeaponEquipped);
         }
 
         internal static void RaiseToggleHeadDevice()
@@ -68,9 +75,9 @@ namespace RealismCommonLib.Events
             BaseEventHandler.RaiseEvent(ToggleHeadDevice);
         }
 
-        internal static void RaiseOnItemEquipped()
+        internal static void RaiseOnAnyItemEquipped()
         {
-            BaseEventHandler.RaiseEvent(OnItemEquipped);
+            BaseEventHandler.RaiseEvent(OnAnyItemEquipped);
         }
 
         internal static void RaiseOnWeaponSwap()
@@ -81,6 +88,16 @@ namespace RealismCommonLib.Events
         internal static void RaiseOnSwappedFromGunToItem()
         {
             BaseEventHandler.RaiseEvent(OnSwappedFromGunToItem);
+        }
+
+        internal static void RaiseOnSwappedFromItemToGun()
+        {
+            BaseEventHandler.RaiseEvent(OnSwappedFromItemToGun);
+        }
+
+        internal static void RaiseEquippedNonWeaponItem()
+        {
+            BaseEventHandler.RaiseEvent(OnNonWeaponEquipped);
         }
     }
 }

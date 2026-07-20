@@ -5,18 +5,13 @@ namespace RealismCommonLib.Events
 {
     public static class PWAEvents
     {
-        public static event Action? OnUpdateWeaponVariables;
+        internal static event Action? OnUpdateWeaponVariables;
+        internal static event Action<Player.FirearmController>? OnUpdateWeaponVariablesWithFc;
 
-        public static event Action? OnPWAInitialize;
-
-        internal static void RaiseOnUpdateWeaponVariables()
+        internal static void RaiseOnUpdateWeaponVariables(Player.FirearmController fc)
         {
+            BaseEventHandler.RaiseEvent(OnUpdateWeaponVariablesWithFc, fc);
             BaseEventHandler.RaiseEvent(OnUpdateWeaponVariables);
-        }
-
-        internal static void RaiseOnPWAInitialize()
-        {
-            BaseEventHandler.RaiseEvent(OnPWAInitialize);
         }
     }
 }

@@ -71,7 +71,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void Awake()
         {
-            PlayerEvents.ToggleHeadDevice += UpdateHipfireState;
         }
 
         void Update()
@@ -82,14 +81,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void OnDestroy()
         {
-            PlayerEvents.ToggleHeadDevice -= UpdateHipfireState;
-        }
-
-        //update hipfire to take NVG toggle into account
-        private void UpdateHipfireState()
-        {
-            ModLogger.LogWarning("Updating hipfire state due to NVG toggle");
-            //PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
         }
 
         public void UpdateFiringState()

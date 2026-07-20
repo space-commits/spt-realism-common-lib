@@ -14,12 +14,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
 {
     public class WeaponState : MonoBehaviour
     {
-        //TODO: replace, refactor stance module to figure this out itself
-        //Ergo factor in Realism was used and balanced around 80 being the best possible ergo
-        private const float BASE_REALISM_ERGO_FACTOR = 80f;
-        //stats
-        private float _ergoFactor;
-
         //state
         private float _totalWeaponWeight;
         private bool _hasShoulderContact;
@@ -29,6 +23,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
         private bool _isPistol;
         private bool _isShotgun;
         private bool _treatAsPistol; //is pistol class, or related, and does not have stock     
+
+        //to be used by external callers
+        public Action? OnWeaponStateChanged;
+        public Action<FirearmController>? OnWeaponStateChangedFc;
 
         public Weapon? WeaponInstance
         {
@@ -193,34 +191,24 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        //TODO: replace, refactor stance module to figure this out itself
-        public float ErgoFactor
-        {
-            get
-            {
-                return _ergoFactor;
-            }
-            private set
-            {
-                _ergoFactor = Mathf.Clamp(value, 1f, BASE_REALISM_ERGO_FACTOR);
-            }
-        }
-
         void Update()
         {
         }
 
         void Awake()
         {
-            PWAEvents.OnUpdateWeaponVariables += UpdateWeaponStateOnStateChange;
-            PWAEvents.OnPWAInitialize += UpdateWeaponStateOnStateChange;
-            PWAEvents.OnPWAInitialize += SetWeaponImmutableState;
+            PWAEvents.OnUpdateWeaponVariablesWithFc += UpdateWeaponStateOnStateChange;
         }
 
         void Destroy()
         {
-            PWAEvents.OnUpdateWeaponVariables -= UpdateWeaponStateOnStateChange;
-            PWAEvents.OnPWAInitialize -= SetWeaponImmutableState;
+            PWAEvents.OnUpdateWeaponVariablesWithFc -= UpdateWeaponStateOnStateChange;
+        }
+
+        private void RaiseOnWeaponStateChanged(FirearmController fc)
+        {
+            BaseEventHandler.RaiseEvent(OnWeaponStateChanged);
+            BaseEventHandler.RaiseEvent(OnWeaponStateChangedFc, fc);
         }
 
         public void CheckForShoulderContact(Weapon weapon)
@@ -246,20 +234,13 @@ namespace RealismCommonLib.StateControllers.InstanceState
             _hasShoulderContact = hasShoulderContact;
         }
 
-        //TODO: replace, refactor stance module to figure this out itself
-        public void UpdateErgoFactor()
-        {
-            _ergoFactor = Mathf.Clamp(BASE_REALISM_ERGO_FACTOR - TotalErgo, 1f, BASE_REALISM_ERGO_FACTOR);
-        }
-
         /// <summary>
         /// When weapon state changes (reload, fold stock, change firemode etc), update relevant weapon state variables.
         /// Don't use componenet's weapon property as it may be null or not updated when this is called.
         /// </summary>
-        public void UpdateWeaponStateOnStateChange()
+        public void UpdateWeaponStateOnStateChange(FirearmController fc)
         {
-            var fc = PlayerStateInstance.FirearmController;
-            if (fc == null) return;
+            ModLogger.LogWarning($"UpdateWeaponStateOnStateChange");
 
             TotalWeaponWeight = fc.Item.TotalWeight;
             WeaponLength = fc.Item.CalculateCellSize().X;
@@ -268,21 +249,21 @@ namespace RealismCommonLib.StateControllers.InstanceState
             {
                 //stats
                 TotalErgo = fc.Item.ErgonomicsTotal;
-                UpdateErgoFactor();
 
                 //state
                 CheckForShoulderContact(fc.Item);
             }
+
+            //this ensures that external callers get triggered after the weapon state is updated, so they can use the updated values
+            RaiseOnWeaponStateChanged(fc);
         }
 
         /// <summary>
         /// For immutable weapon properties.
         /// Don't use componenet's weapon property as it may be null or not updated when this is called.
         /// </summary>
-        public void SetWeaponImmutableState()
+        public void SetWeaponImmutableState(FirearmController fc)
         {
-            var fc = PlayerStateInstance.FirearmController;
-            if (fc == null) return;
             _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
             _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
         }

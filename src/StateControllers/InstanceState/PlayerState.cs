@@ -4,16 +4,9 @@ using EFT.Animations;
 using EFT.InventoryLogic;
 using RealismCommonLib.Events;
 using RealismCommonLib.Utils;
-using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System;
-using System.Numerics;
-using System.Reflection;
 using UnityEngine;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
-using JetBrains.Annotations;
-using GPUInstancer;
 
 namespace RealismCommonLib.StateControllers.InstanceState
 {
@@ -108,8 +101,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        internal Item PreviouslyEquippedItem { get; set; }
-
+        internal MongoID? PreviouslyEquippedItemId { get; set; }
+        internal MongoID? PreviouslyEquippedGunId { get; set; }
         public float BaseStaminaPerc { get; private set; }
 
         public float RemainingArmStamFactor { get; private set; }
@@ -135,6 +128,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             IsScav = Singleton<GameWorld>.Instance?.MainPlayer?.Profile?.Info?.Side == EPlayerSide.Savage;
 
+            PreviouslyEquippedItemId = null; //ensures on new player instance, weapon swap is detected and events are raised
+            PreviouslyEquippedGunId = null; //ensures on new player instance, weapon swap is detected and events are raised
+ 
             //component will be initialized after events fired, so do initial calc here
             CalcPlayerWeightStats();
 
@@ -162,6 +158,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         }
 
         //TODO this should not be opionated, should only calculate the raw % stamina
+        //this hould be handled by modules, stances should calculate this itself, common lib just needs to give the raw values or percentages
         //modules can work out factors based on this.
         private void CalcStaminaFactors()
         {
