@@ -231,6 +231,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             IEnumerable<ProtrudableComponent> remainingProtrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
             hasShoulderContact |= remainingProtrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
 
+            ModLogger.LogWarning($"hasShoulderContact {hasShoulderContact}");
+
             _hasShoulderContact = hasShoulderContact;
         }
 
@@ -256,6 +258,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
             //this ensures that external callers get triggered after the weapon state is updated, so they can use the updated values
             RaiseOnWeaponStateChanged(fc);
+
+            SetWeaponImmutableState(fc);
         }
 
         /// <summary>
@@ -266,6 +270,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
             _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
+
+            ModLogger.LogWarning($"SetWeaponImmutableState: _isPistol {_isPistol}, _isShotgun {_isShotgun}");
         }
     }
 }

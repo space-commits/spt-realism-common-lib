@@ -1,8 +1,6 @@
-﻿using Comfort.Common;
-using RealismCommonLib.ModifierHandlers;
+﻿using RealismCommonLib.ModifierHandlers;
 using UnityEngine;
 using EFT;
-using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.Events;
 using SPT.Reflection.Patching;
@@ -140,59 +138,6 @@ namespace RealismCommonLib.Patches
     // 		__instance.SetCharacterMovementSpeed(__instance.RelativeSpeed * __instance.MaxSpeed * PluginConfig.test3.Value, false);
     //     }
     // }
-
-    public class TryProceedPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(Player), nameof(Player.TryProceed));
-        }
-
-        [PatchPrefix]
-        private static void Prefix(Player __instance, Item item)
-        {
-            if (!__instance.IsYourPlayer) return;
-
-            PlayerEvents.RaiseOnAnyItemEquipped();
-            Logger.LogWarning($"SetItemInHandsPatch: RaiseOnAnyItemEquipped");
-
-            if (item is Weapon weapon)
-            {
-                if ( Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null && weapon.TemplateId != Plugin.PlayerStateInstance.PreviouslyEquippedGunId)
-                {
-                    PlayerEvents.RaiseOnWeaponSwap();
-                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnWeaponSwap");
-                }      
-                else if (Plugin.PlayerStateInstance.PreviouslyEquippedItemId != null && Plugin.PlayerStateInstance.PreviouslyEquippedGunId == null)
-                {
-                    PlayerEvents.RaiseOnSwappedFromItemToGun();
-                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnSwappedFromItemToGun");
-                }
-
-                PlayerEvents.RaiseEquippedWeapon();
-                Logger.LogWarning($"SetItemInHandsPatch: RaiseEquippedWeapon");
-
-                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = weapon.TemplateId;
-                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = null;
-            }
-            else
-            {
-                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null)
-                {
-                    PlayerEvents.RaiseOnSwappedFromGunToItem();
-                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnSwappedFromGunToItem");
-                }
-
-                PlayerEvents.RaiseEquippedNonWeaponItem();
-                Logger.LogWarning($"SetItemInHandsPatch: RaiseEquippedNonWeaponItem");
-
-                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = null;
-                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = item.TemplateId;
-            }
-
-            Logger.LogWarning($"SetItemInHandsPatch: item={item?.TemplateId}, previouslyEquippedItem={Plugin.PlayerStateInstance.PreviouslyEquippedItemId}, previouslyEquippedGun={Plugin.PlayerStateInstance.PreviouslyEquippedGunId}");
-        }
-    }
 
     public class ApplyMotionPatch : ModulePatch
     {

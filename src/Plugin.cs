@@ -60,7 +60,7 @@ namespace RealismCommonLib
             RealismCommonLib.Utils.CurveDrawer.DrawGUI();
         }
 
-        void EnablePatches() 
+        void EnablePatches()
         {
             //Input
             new KeyInputPatch1().Enable();
@@ -68,6 +68,9 @@ namespace RealismCommonLib
             new NVGTogglePatch().Enable();
             new ThermalTogglePatch().Enable();
             new FaceShieldTogglePatch().Enable();
+            //new TryProceedPatch().Enable();
+            new HandsControllerChangedPatch().Enable();
+
 
             //Aiming
             new ToggleAimPatch().Enable();
@@ -82,7 +85,6 @@ namespace RealismCommonLib
             new ApplyMotionPatch().Enable();
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
-            new TryProceedPatch().Enable();
 
             //PWA Patches
             new UpdateWeaponVariablesPatch().Enable();
@@ -106,6 +108,9 @@ namespace RealismCommonLib
             new SetMagTypeNewPatch().Enable();
             new SetMagInWeaponPatch().Enable();
             new SetSpeedParametersPatch().Enable();
+
+            //Weapon
+            new WeaponConstructorPatch().Enable();
         }
 
         void InstantiateInstanceControllers()
@@ -117,7 +122,7 @@ namespace RealismCommonLib
             PlayerEvents.OnPlayerInitArgs += InitPlayerComponents;
         }
 
-        private void InitGlobalComponents(GameObject go) 
+        private void InitGlobalComponents(GameObject go)
         {
             GameStateInstance = go.gameObject.AddComponent<GameState>();
             AudioControllerInstance = go.gameObject.AddComponent<AudioState>();
