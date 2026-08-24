@@ -31,11 +31,19 @@ namespace RealismCommonLib.Events
 
         public static event Action? QuickMagReload;
 
-        public static event Action? NewMagInserted;
+        /// <summary>
+        /// Will be called multiple times during reload
+        /// </summary>
+        public static event Action? InsertingNewMag;
 
-        public static event Action? CurrentMagRemoved;
+        /// <summary>
+        /// Will be called multiple times during reload
+        /// </summary>
+        public static event Action? RemovingCurrentMag;
 
         public static event Action? InternalMagReload;
+
+        public static event Action? NoMagReload;
 
         internal static void RaiseWeaponAnimationStateReset()
         {
@@ -82,19 +90,24 @@ namespace RealismCommonLib.Events
             BaseEventHandler.RaiseEvent(QuickMagReload);
         }
 
-        internal static void RaiseOnCurrentMagRemoved()
+        internal static void RaiseOnRemovingCurrentMag()
         {
-            BaseEventHandler.RaiseEvent(CurrentMagRemoved);
+            BaseEventHandler.RaiseEvent(RemovingCurrentMag);
         }
 
-        internal static void RaiseOnNewMagInserted()
+        internal static void RaiseOnInsertingNewMag()
         {
-            BaseEventHandler.RaiseEvent(NewMagInserted);
+            BaseEventHandler.RaiseEvent(InsertingNewMag);
         }
 
         internal static void RaiseOnInternalMagReload()
         {
             BaseEventHandler.RaiseEvent(InternalMagReload);
+        }
+
+        internal static void RaiseOnNoMagReload()
+        {
+            BaseEventHandler.RaiseEvent(NoMagReload);
         }
     }
 }

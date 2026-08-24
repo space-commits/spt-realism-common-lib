@@ -5,9 +5,48 @@ using HarmonyLib;
 using RealismCommonLib.Events;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using static EFT.Player;
+using static RealismCommonLib.Plugin;
+
+
 
 namespace RealismCommonLib.Patches
 {
+    public class InventoryOpenPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(Player).GetMethod("SetInventoryOpened", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPrefix]
+        private static void PatchPrefix(Player __instance, bool opened)
+        {
+            if (__instance.IsYourPlayer)
+            {
+                AbstractHandsController controller = (AbstractHandsController)AccessTools.Field(typeof(Player), "_handsController").GetValue(__instance);
+
+                if (controller != null)
+                {
+                    if (opened)
+                    {
+                        PlayerEvents.RaiseOnInventoryOpened();
+                        PlayerStateInstance.IsInInventory = true;
+                    }
+                    else
+                    {
+                        PlayerEvents.RaiseOnInventoryClosed();
+                        PlayerStateInstance.IsInInventory = false;
+                    }
+                }
+                else
+                {
+                  PlayerStateInstance.IsInInventory = false;
+                }
+            }
+        }
+    }
+
     public class OnItemAddedOrRemovedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

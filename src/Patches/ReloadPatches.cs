@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using RealismCommonLib.StateControllers.InstanceState;
 using RealismCommonLib.Events;
 using RealismCommonLib.ModifierHandlers;
 using SPT.Reflection.Patching;
@@ -31,8 +32,9 @@ namespace RealismCommonLib.Patches
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
             {
-                ReloadEvents.RaiseWeaponAnimationStateReset();
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("SetAnimatorAndProceduralValues");
+
+                ReloadEvents.RaiseWeaponAnimationStateReset();
             }
         }
     }
@@ -53,17 +55,18 @@ namespace RealismCommonLib.Patches
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
             {
+                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===CheckAmmo===");
+
                 ReloadEvents.RaiseCheckAmmo();
 
-                float config = 
-                    WeaponStateInstance.IsPistol ? PluginConfig.GlobalCheckAmmoPistolSpeedMulti.Value : 
+                float config =
+                    WeaponStateInstance.IsPistol ? PluginConfig.GlobalCheckAmmoPistolSpeedMulti.Value :
                     PluginConfig.GlobalCheckAmmoMulti.Value;
 
-                float modifier = Mathf.Clamp(StatModifiers.CheckAmmoSpeed.Apply(config), 0.7f, 1.35f);
+                float speed = StatModifiers.CheckAmmoSpeed.Apply(config) * ReloadStateInstance.BaseGameAnimationSpeed;
+                speed = Mathf.Clamp(speed, 0.7f, 1.35f);
 
-                __instance.FirearmsAnimator.SetAnimationSpeed(modifier);
-
-                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===CheckAmmo===");
+                __instance.FirearmsAnimator.SetAnimationSpeed(speed);
             }
         }
     }
@@ -85,18 +88,20 @@ namespace RealismCommonLib.Patches
             if (player == null) return;
             if (player.IsYourPlayer)
             {
+                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===CheckChamber===");
+
                 ReloadEvents.RaiseChamberCheck();
 
-                float config = 
+                float config =
                     WeaponStateInstance.IsPistol ? PluginConfig.GlobalCheckChamberPistolSpeedMulti.Value :
-                    WeaponStateInstance.IsShotgun ? PluginConfig.GlobalCheckChamberShotgunSpeedMulti.Value : 
+                    WeaponStateInstance.IsShotgun ? PluginConfig.GlobalCheckChamberShotgunSpeedMulti.Value :
                     PluginConfig.GlobalCheckChamberSpeedMulti.Value;
 
-                float modifier = Mathf.Clamp(StatModifiers.CheckChamberSpeed.Apply(config), 0.6f, 1.8f);
 
-                __instance.FirearmsAnimator.SetAnimationSpeed(modifier);
+                float speed = StatModifiers.CheckChamberSpeed.Apply(config) * ReloadStateInstance.BaseGameAnimationSpeed;
+                speed = Mathf.Clamp(speed, 0.6f, 1.8f);
 
-                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===CheckChamber===");
+                __instance.FirearmsAnimator.SetAnimationSpeed(speed);
             }
         }
     }
@@ -118,27 +123,22 @@ namespace RealismCommonLib.Patches
             Player player = (Player)_playerField.GetValue(__instance);
             if (player == null || !player.IsYourPlayer) return;
             bool isUBGL = __instance.Item.IsUnderBarrelDeviceActive || __instance.Item.IsGrenadeLauncher;
-            if (WeaponStateInstance.IsManuallyOperated || (isUBGL))
+            if (WeaponStateInstance.IsManuallyOperated || isUBGL)
             {
+                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetBoltActionReload===");
+
                 ReloadEvents.RaiseBoltActionPump();
 
                 float config =
-                    WeaponStateInstance.IsShotgun ? PluginConfig.GlobalCheckChamberShotgunSpeedMulti.Value :
+                    WeaponStateInstance.IsShotgun ? PluginConfig.GlobalShotgunRackSpeedMulti.Value :
                     isUBGL ? PluginConfig.GlobalUBGLReloadMulti.Value :
                     WeaponStateInstance.IsBoltAction ? PluginConfig.GlobalBoltSpeedMulti.Value :
                     1f;
 
-                float maxSpeed =
-                    WeaponStateInstance.IsShotgun ? PluginConfig.GlobalCheckChamberShotgunSpeedMulti.Value :
-                    isUBGL ? PluginConfig.GlobalUBGLReloadMulti.Value :
-                    WeaponStateInstance.IsBoltAction ? PluginConfig.GlobalBoltSpeedMulti.Value :
-                    1.4f;
+                float speed = StatModifiers.PumpBoltSpeed.Apply(config) * ReloadStateInstance.BaseGameAnimationSpeed;
+                speed = Mathf.Clamp(speed, 0.7f, 1.5f);
 
-                float modifier = Mathf.Clamp(StatModifiers.CheckChamberSpeed.Apply(config), 0.77f, maxSpeed);
-
-                __instance.FirearmsAnimator.SetAnimationSpeed(modifier);
-
-                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetBoltActionReload===");
+                __instance.FirearmsAnimator.SetAnimationSpeed(speed);
             }
         }
     }
@@ -159,15 +159,15 @@ namespace RealismCommonLib.Patches
             if (fc == null) return;
             if (fc.FirearmsAnimator == __instance)
             {
+                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMalfRepairSpeed===");
+
                 ReloadEvents.RaiseOnSetMalfFix();
 
-                float baseModi = fix * PluginConfig.GlobalFixSpeedMulti.Value;
+                float baseSpeed = fix * PluginConfig.GlobalFixSpeedMulti.Value;
+                float speed = StatModifiers.MalfFixSpeed.Apply(baseSpeed);
+                speed = Mathf.Clamp(speed, 0.75f, 1.18f);
 
-                float modifier = Mathf.Clamp(StatModifiers.MalfFixSpeed.Apply(baseModi), 0.75f, 1.18f);
-
-                __instance.SetAnimationSpeed(modifier);
-
-                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMalfRepairSpeed===");
+                __instance.SetAnimationSpeed(speed);
             }
         }
     }
@@ -188,17 +188,18 @@ namespace RealismCommonLib.Patches
             if (fc == null) return;
             if (fc.FirearmsAnimator == __instance)
             {
+                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===Rechamber===");
+
                 ReloadEvents.RaiseOnRechamber();
 
                 float config =
                     WeaponStateInstance.IsPistol ? PluginConfig.RechamberPistolSpeedMulti.Value :
-                    PluginConfig.GlobalRechamberSpeedMulti.Value; 
+                    PluginConfig.GlobalRechamberSpeedMulti.Value;
 
-                float modifier = Mathf.Clamp(StatModifiers.RechamberSpeed.Apply(config), 0.75f, 1.75f);
+                float speed = StatModifiers.RechamberSpeed.Apply(config);
+                speed = Mathf.Clamp(speed * ReloadStateInstance.BaseGameAnimationSpeed, 0.75f, 1.75f);
 
-                fc.FirearmsAnimator.SetAnimationSpeed(modifier);
-
-                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===Rechamber===");
+                fc.FirearmsAnimator.SetAnimationSpeed(speed);
             }
         }
     }
@@ -221,13 +222,35 @@ namespace RealismCommonLib.Patches
             {
                 if (__result == true)
                 {
-                    if (__instance.Item.GetCurrentMagazine() == null) ReloadStateInstance.NoCurrentMagazineReload = true;
-                    else ReloadStateInstance.NoCurrentMagazineReload = false;
+                    if (PluginConfig.EnableReloadLogging.Value)
+                    {
+                        ModLogger.LogWarning("===CanStartReload===");
+                        ModLogger.LogWarning($"Current magazine = {__instance.Item.GetCurrentMagazine()?.LocalizedName() ?? "null"}");
+                    }
+
+                    var mag = __instance.Item.GetCurrentMagazine();
+                    var hasMag = mag != null;
+
+                    if (hasMag && __instance.Weapon.ReloadMode == EFT.InventoryLogic.Weapon.EReloadMode.ExternalMagazine)
+                    {
+                        ReloadStateInstance.MagReloadState = EMagReloadState.RemovingCurrentMag;
+                        ReloadStateInstance.CurrentMagazine = mag;
+                        ReloadStateInstance.IsMagReloading = true;
+                        ReloadEvents.RaiseOnRemovingCurrentMag();
+                    }
+                    else
+                    {
+                        ReloadStateInstance.CurrentMagazine = null;
+                        ReloadEvents.RaiseOnNoMagReload();
+                    }
                 }
             }
         }
     }
 
+    //This is actually called second after SetMagTypeCurrent
+    //Reliably called only once so good for entry point
+    //The magazine here will be the one being reloaded to
     public class ReloadMagPatch : ModulePatch
     {
         private static FieldInfo _playerField;
@@ -238,22 +261,22 @@ namespace RealismCommonLib.Patches
             return typeof(Player.FirearmController).GetMethod("ReloadMag", BindingFlags.Instance | BindingFlags.Public);
         }
 
-        [PatchPostfix]
-        private static void PatchPostfix(Player.FirearmController __instance, MagazineItemClass magazine)
+        [PatchPrefix]
+        private static void PatchPrefix(Player.FirearmController __instance, MagazineItemClass magazine)
         {
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
             {
-                Plugin.ReloadStateInstance.IsMagReloading = true;
-                Plugin.ReloadStateInstance.CurrentMagazine = magazine;
-                ReloadEvents.RaiseOnMagReload();
-
                 if (PluginConfig.EnableReloadLogging.Value)
                 {
-                    Logger.LogWarning("ReloadMag Patch");
+                    Logger.LogWarning("==ReloadMag Patch==");
                     Logger.LogWarning("magazine = " + magazine.LocalizedName());
                     Logger.LogWarning("magazine weight = " + magazine.TotalWeight);
                 }
+
+                ReloadStateInstance.NextMagazine = magazine;
+                ReloadStateInstance.IsMagReloading = true;
+                ReloadEvents.RaiseOnMagReload();
             }
         }
     }
@@ -268,24 +291,30 @@ namespace RealismCommonLib.Patches
             return typeof(Player.FirearmController).GetMethod("QuickReloadMag", BindingFlags.Instance | BindingFlags.Public);
         }
 
-        [PatchPostfix]
-        private static void PatchPostfix(Player.FirearmController __instance, MagazineItemClass magazine)
+        [PatchPrefix]
+        private static void PatchPrefix(Player.FirearmController __instance, MagazineItemClass magazine)
         {
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
             {
-                Plugin.ReloadStateInstance.IsQuickReloading = true;
-                Plugin.ReloadStateInstance.IsMagReloading = true;
-                Plugin.ReloadStateInstance.CurrentMagazine = magazine;
-                ReloadEvents.RaiseOnMagReload();
-                ReloadEvents.RaiseOnQuickMagReload();
+                if (PluginConfig.EnableReloadLogging.Value)
+                {
+                    Logger.LogWarning("==QuickReloadMag Patch==");
+                    Logger.LogWarning("magazine = " + magazine.LocalizedName());
+                    Logger.LogWarning("magazine weight = " + magazine.TotalWeight);
+                }
 
-                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===QuickReloadMag===");
+                ReloadStateInstance.NextMagazine = magazine;
+                ReloadStateInstance.IsQuickReloading = true;
+                ReloadStateInstance.IsMagReloading = true;
+                ReloadEvents.RaiseOnQuickMagReload();
             }
         }
     }
 
     //reload speed of current mag
+    //always called first when starting reload, even when reloading from no mag
+    //will be called twice during process, once at start and once after new mag insterted but before OnMagInsertedPatch
     public class SetMagTypeCurrentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -302,12 +331,12 @@ namespace RealismCommonLib.Patches
             if (fc == null) return;
             if (fc.FirearmsAnimator == __instance)
             {
-                ReloadEvents.RaiseOnCurrentMagRemoved();
-
-                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.CurrentMagSpeedMulti.Value, StatModifiers.CurrentMagRemoveSpeed);
-                __instance.SetAnimationSpeed(totalSpeed);
-
-                if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMagTypeCurrent===");
+                if (PluginConfig.EnableReloadLogging.Value)
+                {
+                    Logger.LogWarning("===SetMagTypeCurrent===");
+                    Logger.LogWarning("magazine = " + (ReloadStateInstance?.CurrentMagazine?.LocalizedName() ?? "null"));
+                    Logger.LogWarning("magazine weight = " + (ReloadStateInstance?.CurrentMagazine?.TotalWeight ?? 0));
+                }
             }
         }
     }
@@ -331,24 +360,13 @@ namespace RealismCommonLib.Patches
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
             {
-                FirearmsAnimator fa = (FirearmsAnimator)faField.GetValue(__instance);
-
-                //watch if calling this twice caused issues
-                ReloadEvents.RaiseOnCurrentMagRemoved();
-
-                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.CurrentMagSpeedMulti.Value, StatModifiers.CurrentMagRemoveSpeed);
-                fa.SetAnimationSpeed(totalSpeed);
-
-                if (PluginConfig.EnableReloadLogging.Value == true)
-                {
-                    Logger.LogWarning("===SetMagTypeNew===");
-                }
+                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===SetMagTypeNew===");
             }
-
         }
     }
 
     //speed of putting mag in weapon
+    //called twice, straight after the last call of this patch
     public class SetMagInWeaponPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -359,14 +377,43 @@ namespace RealismCommonLib.Patches
         [PatchPostfix]
         private static void PatchPostfix(FirearmsAnimator __instance)
         {
-            if (ReloadStateInstance.IsMagReloading)
+            Player player = PlayerStateInstance.Player;
+            if (player == null) return;
+            Player.FirearmController fc = player.HandsController as Player.FirearmController;
+            if (fc == null) return;
+            if (fc.FirearmsAnimator == __instance)
             {
-                ReloadEvents.RaiseOnNewMagInserted();
-
-                float totalSpeed = ReloadStateInstance.GetMagReloadSpeed(PluginConfig.MagInsertSpeedMulti.Value, StatModifiers.NewMagReloadSpeed);               
-                __instance.SetAnimationSpeed(totalSpeed);
+                if (!ReloadStateInstance.IsMagReloading) return;
 
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMagInWeapon===");
+
+                ReloadEvents.RaiseOnInsertingNewMag(); // will be called multiple times
+                ReloadStateInstance.MagReloadState = EMagReloadState.InsertingNewMag;
+            }
+        }
+    }
+
+    //reset mag reload speed
+    public class OnMagInsertedPatch : ModulePatch
+    {
+        private static FieldInfo _playerField;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            _playerField = AccessTools.Field(typeof(FirearmController), "_player");
+            return typeof(Player.FirearmController).GetMethod("method_50", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(ref Player.FirearmController __instance)
+        {
+            //to find this again, look for private void method_47(){ this.CurrentOperation.OnMagInsertedToWeapon(); }
+            Player player = (Player)_playerField.GetValue(__instance);
+            if (player.IsYourPlayer == true)
+            {
+                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===OnMagInsertedPatch/method_50===");
+
+                ReloadStateInstance.ResetMagazineReloadState();
             }
         }
     }
@@ -454,7 +501,7 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPostfix]
-        private static void PatchPostfix(FirearmsAnimator __instance)
+        private static void PatchPostfix(FirearmsAnimator __instance, float reload)
         {
             Player player = PlayerStateInstance.Player;
             if (player == null) return;
@@ -462,37 +509,10 @@ namespace RealismCommonLib.Patches
             if (fc == null) return;
             if (fc.FirearmsAnimator == __instance)
             {
-                ReloadStateInstance.ResetReloadSpeed();
+                ReloadStateInstance.ResetMagazineReloadState();
+                ReloadStateInstance.BaseGameAnimationSpeed = reload;
 
                 if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===SetSpeedParameters===");
-            }
-        }
-    }
-
-    //reset mag reload speed
-    public class OnMagInsertedPatch : ModulePatch
-    {
-        private static FieldInfo _playerField;
-
-        protected override MethodBase GetTargetMethod()
-        {
-            _playerField = AccessTools.Field(typeof(FirearmController), "_player");
-            return typeof(Player.FirearmController).GetMethod("method_50", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPostfix]
-        private static void PatchPostfix(ref Player.FirearmController __instance)
-        {
-            //to find this again, look for private void method_47(){ this.CurrentOperation.OnMagInsertedToWeapon(); }
-            Player player = (Player)_playerField.GetValue(__instance);
-            if (player.IsYourPlayer == true)
-            {
-                ReloadStateInstance.IsMagReloading = false;
-                ReloadStateInstance.IsQuickReloading = false;
-
-                ReloadStateInstance.ResetReloadSpeed();
-
-                if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===OnMagInsertedPatch/method_50===");
             }
         }
     }

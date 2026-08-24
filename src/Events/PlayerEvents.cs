@@ -40,6 +40,20 @@ namespace RealismCommonLib.Events
 
         public static event Action? OnNonWeaponEquipped;
 
+        public static event Action? OnInventoryOpened;
+
+        public static event Action? OnInventoryClosed;
+
+        internal static void RaiseOnInventoryOpened()
+        {
+            BaseEventHandler.RaiseEvent(OnInventoryOpened);
+        }
+
+        internal static void RaiseOnInventoryClosed()
+        {
+            BaseEventHandler.RaiseEvent(OnInventoryClosed);
+        }
+
         internal static void RaiseOnAimStateChanged()
         {
             BaseEventHandler.RaiseEvent(AimStateChanged);

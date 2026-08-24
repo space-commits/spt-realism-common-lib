@@ -48,7 +48,7 @@ namespace RealismCommonLib
         public static ConfigEntry<float> GlobalFixSpeedMulti { get; set; }
         public static ConfigEntry<float> GlobalUBGLReloadMulti { get; set; }
         public static ConfigEntry<float> GlobalRechamberSpeedMulti { get; set; }
-        public static ConfigEntry<float> GlobalShotgunRackSpeedFactor { get; set; }
+        public static ConfigEntry<float> GlobalShotgunRackSpeedMulti { get; set; }
         public static ConfigEntry<float> GlobalCheckChamberSpeedMulti { get; set; }
         public static ConfigEntry<float> GlobalCheckChamberShotgunSpeedMulti { get; set; }
         public static ConfigEntry<float> GlobalCheckChamberPistolSpeedMulti { get; set; }
@@ -56,8 +56,9 @@ namespace RealismCommonLib
         public static ConfigEntry<float> GlobalCheckAmmoMulti { get; set; }
         public static ConfigEntry<float> QuickReloadSpeedMulti { get; set; }
         public static ConfigEntry<float> CurrentMagSpeedMulti { get; set; }
-        public static ConfigEntry<float> MagInsertSpeedMulti { get; set; }
+        public static ConfigEntry<float> NewMagSpeedMulti { get; set; }
         public static ConfigEntry<float> InternalMagReloadMulti { get; set; }
+        public static ConfigEntry<float> RevolverReloadMulti { get; set; }
         public static ConfigEntry<float> GlobalBoltSpeedMulti { get; set; }
         public static ConfigEntry<float> RechamberPistolSpeedMulti { get; set; }
 
@@ -98,23 +99,24 @@ namespace RealismCommonLib
             FiringMovementResetDelay = config.Bind<float>(firingState, "Firing Movement Speed Reset Delay", 0.5f, new ConfigDescription("The Time In Seconds That Has To Be Elapsed Before Firing Is Considered Over, Used By Different Modules To Time Resets Related To Firing,", new AcceptableValueRange<float>(-0.1f, 0.5f), new ConfigurationManagerAttributes { IsAdvanced = true, Order = 4 }));
 
             GlobalAimSpeedModifier = config.Bind<float>(weaponSpeed, "Aim Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 200 }));
-            PistolGlobalAimSpeedModifier = config.Bind<float>(weaponSpeed, "Pistol Aim Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 100}));
-            GlobalMagReloadSpeedMulti = config.Bind<float>(weaponSpeed, "Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 15}));
-            GlobalFixSpeedMulti = config.Bind<float>(weaponSpeed, "Malfunction Fix Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 14}));
-            GlobalUBGLReloadMulti = config.Bind<float>(weaponSpeed, "UBGL Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 13, IsAdvanced = true}));
-            RechamberPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Rechamber Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 12, IsAdvanced = true}));
-            GlobalRechamberSpeedMulti = config.Bind<float>(weaponSpeed, "Rechamber Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 11}));
-            GlobalBoltSpeedMulti = config.Bind<float>(weaponSpeed, "Bolt Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 10}));
-            GlobalShotgunRackSpeedFactor = config.Bind<float>(weaponSpeed, "Shotgun Rack Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 9}));
-            GlobalCheckChamberSpeedMulti = config.Bind<float>(weaponSpeed, "Chamber Check Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 8}));
-            GlobalCheckChamberShotgunSpeedMulti = config.Bind<float>(weaponSpeed, "Shotgun Chamber Check Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 7, IsAdvanced = true}));
-            GlobalCheckChamberPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Chamber Check Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 6, IsAdvanced = true}));
-            GlobalCheckAmmoPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Check Ammo Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 5, IsAdvanced = true}));
-            GlobalCheckAmmoMulti = config.Bind<float>(weaponSpeed, "Check Ammo Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 4}));
-            QuickReloadSpeedMulti = config.Bind<float>(weaponSpeed, "Quick Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 2}));
-            InternalMagReloadMulti = config.Bind<float>(weaponSpeed, "Internal Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1}));
+            PistolGlobalAimSpeedModifier = config.Bind<float>(weaponSpeed, "Pistol Aim Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 100 }));
+            GlobalMagReloadSpeedMulti = config.Bind<float>(weaponSpeed, "Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 15 }));
+            GlobalFixSpeedMulti = config.Bind<float>(weaponSpeed, "Malfunction Fix Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 14 }));
+            GlobalUBGLReloadMulti = config.Bind<float>(weaponSpeed, "UBGL Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 13, IsAdvanced = true }));
+            RechamberPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Rechamber Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 12, IsAdvanced = true }));
+            GlobalRechamberSpeedMulti = config.Bind<float>(weaponSpeed, "Rechamber Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 11 }));
+            GlobalBoltSpeedMulti = config.Bind<float>(weaponSpeed, "Bolt Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 10 }));
+            GlobalShotgunRackSpeedMulti = config.Bind<float>(weaponSpeed, "Shotgun Rack Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 9 }));
+            GlobalCheckChamberSpeedMulti = config.Bind<float>(weaponSpeed, "Chamber Check Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 8 }));
+            GlobalCheckChamberShotgunSpeedMulti = config.Bind<float>(weaponSpeed, "Shotgun Chamber Check Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 7, IsAdvanced = true }));
+            GlobalCheckChamberPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Chamber Check Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 6, IsAdvanced = true }));
+            GlobalCheckAmmoPistolSpeedMulti = config.Bind<float>(weaponSpeed, "Pistol Check Ammo Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 5, IsAdvanced = true }));
+            GlobalCheckAmmoMulti = config.Bind<float>(weaponSpeed, "Check Ammo Speed Multi.", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 4 }));
+            QuickReloadSpeedMulti = config.Bind<float>(weaponSpeed, "Quick Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 2 }));
+            InternalMagReloadMulti = config.Bind<float>(weaponSpeed, "Internal Magazine Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
+            RevolverReloadMulti = config.Bind<float>(weaponSpeed, "Revolver Reload Speed Multi", 1f, new ConfigDescription("", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
             CurrentMagSpeedMulti = config.Bind<float>(weaponSpeed, "Remove Magazine Reload Speed Multi", 1f, new ConfigDescription("Speed of removing magazine during reload sequence.", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
-            MagInsertSpeedMulti = config.Bind<float>(weaponSpeed, "Insert Magazine Reload Speed Multi", 1f, new ConfigDescription("Speed of inserting magazine during reload sequance.", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
+            NewMagSpeedMulti = config.Bind<float>(weaponSpeed, "Insert Magazine Reload Speed Multi", 1f, new ConfigDescription("Speed of inserting magazine during reload sequance.", new AcceptableValueRange<float>(0.1f, 10.0f), new ConfigurationManagerAttributes { ShowRangeAsPercent = false, Order = 1 }));
         }
 
         public static ConfigEntry<KeyboardShortcut> ToggleCurveEditorKey;

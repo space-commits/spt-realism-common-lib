@@ -5,16 +5,25 @@ using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.ModifierHandlers;
 using RealismCommonLib.Utils;
+using System;
 using System.Numerics;
 using UnityEngine;
 using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.StateControllers.InstanceState
 {
+    public enum EMagReloadState
+    {
+        None,
+        RemovingCurrentMag,
+        InsertingNewMag
+    }
+
     public class ReloadState : MonoBehaviour
     {
         public const float MIN_INTERNAL_RELOAD_SPEED = 0.7f;
         public const float MAX_INTERNAL_RELOAD_SPEED = 1.5f;
+        public const float MIN_MAG_RELOAD_SPEED = 0.5f;
         public const float MAX_MAG_RELOAD_SPEED = 1.4f;
         public const float MAX_QUICK_MAG_RELOAD_SPEED = 1.65f;
 
@@ -45,14 +54,12 @@ namespace RealismCommonLib.StateControllers.InstanceState
         }
 
         public bool IsAttemptingToReloadInternalMag { get; internal set; }
-
         public bool IsAttemptingRevolverReload { get; internal set; }
 
         public bool IsQuickReloading { get; internal set; }
-
         public bool IsMagReloading { get; internal set; }
 
-        public bool NoCurrentMagazineReload { get; internal set; }
+        public EMagReloadState MagReloadState { get; internal set; }
 
         public float MaxMagReloadSpeed
         {
@@ -66,15 +73,27 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public float CurrentMagReloadSpeed { get; internal set; }
 
-        public MagazineItemClass CurrentMagazine { get; internal set; }
+        public MagazineItemClass? NextMagazine { get; internal set; }
+        public MagazineItemClass? CurrentMagazine { get; internal set; }
+
+        public float BaseGameAnimationSpeed { get; internal set; } = 1f;
 
         void Update()
         {
-            if (_reloadCheckTimer.Ready()) ReloadStateCheck();
+            if (_reloadCheckTimer.Ready())
+            {
+                ReloadStateCheck();
+            }
+
         }
 
-        public void ResetReloadSpeed()
+        public void ResetMagazineReloadState()
         {
+            NextMagazine = null;
+            CurrentMagazine = null;
+            IsMagReloading = false;
+            IsQuickReloading = false;
+            MagReloadState = EMagReloadState.None;
             PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(1f);
         }
 
@@ -83,15 +102,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             //IsInReloadOpertation is a potentially expensive check, try to see if it's needed
             if (IsInReloadOpertation)
             {
-                if (IsAttemptingToReloadInternalMag)
-                {
-                    float config = PluginConfig.InternalMagReloadMulti.Value;
-                    float modifier = Mathf.Clamp(StatModifiers.InternalReloadModifier.Apply(config), MIN_INTERNAL_RELOAD_SPEED, MAX_INTERNAL_RELOAD_SPEED);
-
-                    PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(modifier);
-
-                    if (PluginConfig.EnableReloadLogging.Value) ModLogger.LogWarning("IsAttemptingToReloadInternalMag");
-                }
+                InternalReloadStateCheck();
+                MagazineReloadStateCheck();
             }
             else
             {
@@ -100,20 +112,66 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        public float GetMagReloadSpeed(float configModifier, FloatMultiplierSet handler)
+        public void InternalReloadStateCheck()
         {
-            float baseSpeed = ReloadStateInstance.GetBaseMagReloadSpeed();
-            float modifier = handler.Apply(configModifier);
-            float finalSpeed = Mathf.Clamp(modifier * baseSpeed, 0.5f, 1.8f);
+            if (IsAttemptingToReloadInternalMag)
+            {
+                float speed = StatModifiers.InternalReloadModifier.Apply(PluginConfig.InternalMagReloadMulti.Value) * BaseGameAnimationSpeed;
+                speed = Mathf.Clamp(speed, MIN_INTERNAL_RELOAD_SPEED, MAX_INTERNAL_RELOAD_SPEED);
 
-            if (PluginConfig.EnableReloadLogging.Value) ModLogger.LogWarning($"Final mag reload speed {finalSpeed}");
-            return finalSpeed; //TODO: replace with per-weapon min/max if attachment module is installed?
+                PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(speed);
+
+                if (PluginConfig.EnableReloadLogging.Value)
+                    ModLogger.LogWarning($"InternalReloadStateCheck: isAttemptingToReloadInternalMag={IsAttemptingToReloadInternalMag}, speed={speed}");
+
+            }
+
+            if (IsAttemptingRevolverReload)
+            {
+                float speed = PluginConfig.RevolverReloadMulti.Value;
+                speed = Mathf.Clamp(StatModifiers.RevolverReloadModifier.Apply(speed), MIN_INTERNAL_RELOAD_SPEED, MAX_INTERNAL_RELOAD_SPEED);
+
+                PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(speed);
+
+                if (PluginConfig.EnableReloadLogging.Value)
+                    ModLogger.LogWarning($"RevolverReloadStateCheck: isAttemptingRevolverReload={IsAttemptingRevolverReload}, speed={speed}");
+            }
         }
 
-        public float GetBaseMagReloadSpeed()
+        public void MagazineReloadStateCheck()
         {
-            float config = IsQuickReloading ? PluginConfig.QuickReloadSpeedMulti.Value : PluginConfig.GlobalMagReloadSpeedMulti.Value;
-            return StatModifiers.MagReloadSpeed.Apply(config);
+            if (IsMagReloading || IsQuickReloading || MagReloadState != EMagReloadState.None)
+            {
+                float totalSpeedModifier = BaseGameAnimationSpeed;
+
+                if (IsQuickReloading)
+                {
+                    totalSpeedModifier *= StatModifiers.QuickMagReloadSpeed.Apply(PluginConfig.QuickReloadSpeedMulti.Value);
+                }
+
+                if (IsMagReloading)
+                {
+                    totalSpeedModifier *= StatModifiers.MagReloadSpeed.Apply(PluginConfig.GlobalMagReloadSpeedMulti.Value);
+                }
+
+                if (MagReloadState == EMagReloadState.RemovingCurrentMag)
+                {
+                    totalSpeedModifier *= StatModifiers.CurrentMagRemoveSpeed.Apply(PluginConfig.CurrentMagSpeedMulti.Value);
+                }
+
+                if (MagReloadState == EMagReloadState.InsertingNewMag)
+                {
+                    totalSpeedModifier *= StatModifiers.NewMagReloadSpeed.Apply(PluginConfig.NewMagSpeedMulti.Value);
+                }
+
+                totalSpeedModifier = Mathf.Clamp(totalSpeedModifier, MIN_MAG_RELOAD_SPEED, MaxMagReloadSpeed);
+
+                PlayerStateInstance.Player.HandsAnimator.SetAnimationSpeed(totalSpeedModifier);
+
+                if (PluginConfig.EnableReloadLogging.Value)
+                    ModLogger.LogWarning($"ReloadStateCheck: isMagReloading={IsMagReloading}, isQuickReloading={IsQuickReloading}, magReloadState={MagReloadState}, totalSpeedModifier={totalSpeedModifier}");
+
+            }
         }
     }
 }

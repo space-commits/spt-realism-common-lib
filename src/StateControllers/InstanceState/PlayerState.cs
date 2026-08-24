@@ -33,6 +33,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public Player Player { get; set; }
 
+        public bool IsInInventory { get; set; }
+
         public FirearmController? FirearmController
         {
             get
@@ -90,6 +92,14 @@ namespace RealismCommonLib.StateControllers.InstanceState
             get
             {
                 return Player.MovementContext.StationaryWeapon != null;
+            }
+        }
+
+        public bool IsMounting
+        {
+            get
+            {
+                return Player.MovementContext.IsInMountedState;
             }
         }
 

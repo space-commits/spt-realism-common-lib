@@ -14,7 +14,7 @@ namespace RealismCommonLib
     {
         public const string MOD_GUID = "com.fontaine.realismCommonlib";
         public const string MOD_NAME = "Realism-CommonLib";
-        public const string MOD_VERSION = "1.0.0";
+        public const string MOD_VERSION = "0.0.1";
 
         //common lib's state and controller instances
         public static GameState GameStateInstance;
@@ -85,6 +85,7 @@ namespace RealismCommonLib
             new ApplyMotionPatch().Enable();
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
+            new InventoryOpenPatch().Enable();
 
             //PWA Patches
             new UpdateWeaponVariablesPatch().Enable();
