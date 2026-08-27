@@ -231,8 +231,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
             IEnumerable<ProtrudableComponent> remainingProtrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
             hasShoulderContact |= remainingProtrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
 
-            ModLogger.LogWarning($"hasShoulderContact {hasShoulderContact}");
-
             _hasShoulderContact = hasShoulderContact;
         }
 
@@ -242,8 +240,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// </summary>
         public void UpdateWeaponStateOnStateChange(FirearmController fc)
         {
-            ModLogger.LogWarning($"UpdateWeaponStateOnStateChange");
-
             TotalWeaponWeight = fc.Item.TotalWeight;
             WeaponLength = fc.Item.CalculateCellSize().X;
 
@@ -270,8 +266,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
             _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
-
-            ModLogger.LogWarning($"SetWeaponImmutableState: _isPistol {_isPistol}, _isShotgun {_isShotgun}");
         }
     }
 }

@@ -54,8 +54,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
             NVGIsActive = nvgComponent != null && (nvgComponent.Togglable == null || nvgComponent.Togglable.On);
             ThermalIsActive = thermComponent != null && (thermComponent.Togglable == null || thermComponent.Togglable.On);
 
-            ModLogger.LogWarning($"GearState: FaceShieldIsActive={FaceShieldIsActive}, NVGIsActive={NVGIsActive}, ThermalIsActive={ThermalIsActive}");
-
             PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
         }
     }
