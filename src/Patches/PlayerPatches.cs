@@ -77,8 +77,7 @@ namespace RealismCommonLib.Patches
         {
             if (__instance.IsYourPlayer)
             {
-                PlayerEvents.RaiseOnPlayerInitArgs(__instance);
-                PlayerEvents.RaiseOnPlayerInit();
+                PlayerEvents.RaiseOnPlayerInit(__instance);
             }
             else
             {
@@ -226,8 +225,8 @@ namespace RealismCommonLib.Patches
 
             if (__instance.IsSprintEnabled)
                 __result *= StatModifiers.SprintSpeedModifier.Apply(1f);
-            else
-                __result *= StatModifiers.WalkSpeedModifier.Apply(1f);
+            // else
+            //     __result *= StatModifiers.WalkSpeedModifier.Apply(1f);
         }
     }
 
@@ -239,14 +238,14 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPrefix]
-        private static void Prefix(PlayerAnimator __instance, ref float charaterMovementSpeed)
+        private static void Postfix(PlayerAnimator __instance, ref float charaterMovementSpeed)
         {
             if (Plugin.PlayerStateInstance == null) return;
             Player player = Plugin.PlayerStateInstance.Player;
             if (player == null) return;
             if (player.MovementContext.PlayerAnimator != __instance) return;
 
-            charaterMovementSpeed *= StatModifiers.WalkSpeedModifier.Apply(1f);
+            charaterMovementSpeed = StatModifiers.WalkSpeedModifier.Apply(charaterMovementSpeed);
         }
     }
 

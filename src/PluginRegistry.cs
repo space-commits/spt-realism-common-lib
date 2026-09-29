@@ -26,8 +26,8 @@ namespace RealismCommonLib
             //FikaIsPresent = Chainloader.PluginInfos.ContainsKey("com.fika.fika");
 
             Plugin.ModLogger.LogWarning(FOVFixEnabled
-                 ? "FOVFixEnabled detected."
-                 : "FOVFixEnabled not detected.");
+                 ? "Realism CommonLib: FOVFix detected."
+                 : "");
         }
     }
 }

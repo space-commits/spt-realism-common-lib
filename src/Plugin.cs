@@ -74,6 +74,7 @@ namespace RealismCommonLib
 
             //Aiming
             new ToggleAimPatch().Enable();
+            new SetAimPatch().Enable();
 
             //Shooting
             new ShootPatch().Enable();
@@ -120,7 +121,7 @@ namespace RealismCommonLib
             InitGlobalComponents(this.gameObject);
 
             //this handles adding player-scoped components on player init.
-            PlayerEvents.OnPlayerInitArgs += InitPlayerComponents;
+            PlayerEvents.OnPlayerInitRef += InitPlayerComponents;
         }
 
         private void InitGlobalComponents(GameObject go)

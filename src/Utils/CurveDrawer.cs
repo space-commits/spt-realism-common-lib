@@ -37,6 +37,29 @@ namespace RealismCommonLib.Utils
             ZCurve = z ?? new AnimationCurve();
         }
 
+        public Vector3Curve(Vector3Curve other)
+        {
+            XCurve = CloneCurve(other.XCurve);
+            YCurve = CloneCurve(other.YCurve);
+            ZCurve = CloneCurve(other.ZCurve);
+        }
+
+        public Vector3Curve Clone()
+        {
+            return new Vector3Curve(this);
+        }
+
+        private static AnimationCurve CloneCurve(AnimationCurve source)
+        {
+            if (source == null) return new AnimationCurve();
+
+            return new AnimationCurve(source.keys)
+            {
+                preWrapMode = source.preWrapMode,
+                postWrapMode = source.postWrapMode
+            };
+        }
+
         public Vector3 Evaluate(float t)
         {
             return new Vector3(

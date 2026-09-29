@@ -159,6 +159,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public float BaseMeleePen { get; set; } = 0f;
 
+        public Weapon.EReloadMode WeaponReloadType { get ; internal set; }
+
         //this should only return BSG aim speed if attahcment overhaul is not present, but should still be factored by health state
         //it needs to factor adrenaline, stamina, injury, weapon stats, weapon sight, etc. as calculated previously
         public float TotalFinalAimSpeed
@@ -264,8 +266,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// </summary>
         public void SetWeaponImmutableState(FirearmController fc)
         {
-            _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
-            _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
+            _isPistol = fc.Weapon.WeapClass.ToLower() == "pistol";
+            _isShotgun = fc.Weapon.WeapClass.ToLower() == "shotgun";
+            WeaponReloadType = fc.Weapon.ReloadMode;
         }
     }
 }

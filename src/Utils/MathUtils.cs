@@ -16,6 +16,11 @@ namespace RealismCommonLib.Utils
             );
         }
 
+        public static bool AreVector3sEqual(Vector3 a, Vector3 b, float epsilon = 0.001f)
+        {
+            return Vector3.Distance(a, b) < epsilon;
+        }
+
         public static bool AreVector2sEqual(Vector2 a, Vector2 b, float epsilon = 0.001f)
         {
             return Vector2.Distance(a, b) < epsilon;

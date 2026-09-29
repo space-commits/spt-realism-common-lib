@@ -1,12 +1,6 @@
-﻿using Comfort.Common;
-using EFT;
-using EFT.Animations;
-using EFT.InventoryLogic;
-using HarmonyLib;
+﻿using EFT.InventoryLogic;
 using RealismCommonLib.ModifierHandlers;
 using RealismCommonLib.Utils;
-using System;
-using System.Numerics;
 using UnityEngine;
 using static RealismCommonLib.Plugin;
 
