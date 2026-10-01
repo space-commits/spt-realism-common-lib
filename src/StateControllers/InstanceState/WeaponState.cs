@@ -217,7 +217,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             bool hasShoulderContact = false;
             IEnumerable<ProtrudableComponent> protrudableComponents = Enumerable.Empty<ProtrudableComponent>();
-            if (InteractionsHandlerClass.CanFold(weapon, out var foldable))
+            if (ItemManipulator.CanFold(weapon, out var foldable))
             {
                 if (foldable.FoldedSlot == null)
                 {
@@ -225,12 +225,12 @@ namespace RealismCommonLib.StateControllers.InstanceState
                 }
                 else if (foldable.FoldedSlot.ContainedItem != null)
                 {
-                    protrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(foldable.FoldedSlot.ContainedItem).ToArray();
+                    protrudableComponents = ItemExtensions.GetItemComponentsInChildren<ProtrudableComponent>(foldable.FoldedSlot.ContainedItem).ToArray();
                     hasShoulderContact |= !foldable.Folded && protrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
                 }
             }
 
-            IEnumerable<ProtrudableComponent> remainingProtrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
+            IEnumerable<ProtrudableComponent> remainingProtrudableComponents = ItemExtensions.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
             hasShoulderContact |= remainingProtrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
 
             _hasShoulderContact = hasShoulderContact;

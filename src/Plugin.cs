@@ -14,7 +14,7 @@ namespace RealismCommonLib
     {
         public const string MOD_GUID = "com.fontaine.realismCommonlib";
         public const string MOD_NAME = "Realism-CommonLib";
-        public const string MOD_VERSION = "0.0.1";
+        public const string MOD_VERSION = "0.0.2";
 
         //common lib's state and controller instances
         public static GameState GameStateInstance;

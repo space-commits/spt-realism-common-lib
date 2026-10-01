@@ -67,8 +67,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public float CurrentMagReloadSpeed { get; internal set; }
 
-        public MagazineItemClass? NextMagazine { get; internal set; }
-        public MagazineItemClass? CurrentMagazine { get; internal set; }
+        public Magazine? NextMagazine { get; internal set; }
+        public Magazine? CurrentMagazine { get; internal set; }
 
         public float BaseGameAnimationSpeed { get; internal set; } = 1f;
 

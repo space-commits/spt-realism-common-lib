@@ -37,7 +37,7 @@ namespace RealismCommonLib.Patches
         private static FieldInfo _playerField;
         protected override MethodBase GetTargetMethod()
         {
-            _playerField = AccessTools.Field(typeof(EFT.Player.ItemHandsController), "_player");
+            _playerField = AccessTools.Field(typeof(Player.ItemHandsController), "_player");
             return typeof(Player.FirearmController).GetMethod("SetAim", [typeof(bool)]);
         }
 

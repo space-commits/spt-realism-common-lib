@@ -14,7 +14,7 @@ namespace RealismCommonLib.StateControllers.GlobalState
 
         public void PlayADSSound(float vol, bool useMovementSound)
         {
-            Plugin.PlayerStateInstance.Player.method_60(vol, useMovementSound);
+            Plugin.PlayerStateInstance.Player.PlayGearSound(vol, useMovementSound);
         }
 
         public void PlayKnifeAttackSound(int vol)

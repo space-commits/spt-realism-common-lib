@@ -10,9 +10,9 @@ using System.Reflection;
 using UnityEngine;
 using static EFT.Player;
 using static RealismCommonLib.Plugin;
-using WeaponStatSubclass = EFT.Player.FirearmController.GClass2050;
-using WeaponEventHandlerClass = EFT.Player.FirearmController.GClass2005;
-using MagReloadClass = EFT.Player.FirearmController.GClass2039;
+using WeaponStatSubclass = EFT.Player.FirearmController.PullOutMagOperation;
+using WeaponEventHandlerClass = EFT.Player.FirearmController.InsertMagResult;
+using MagReloadClass = EFT.Player.FirearmController.InsertMagOperation;
 
 namespace RealismCommonLib.Patches
 {
@@ -262,7 +262,7 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPrefix]
-        private static void PatchPrefix(Player.FirearmController __instance, MagazineItemClass magazine)
+        private static void PatchPrefix(Player.FirearmController __instance, EFT.InventoryLogic.Magazine magazine)
         {
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
@@ -292,7 +292,7 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPrefix]
-        private static void PatchPrefix(Player.FirearmController __instance, MagazineItemClass magazine)
+        private static void PatchPrefix(Player.FirearmController __instance, EFT.InventoryLogic.Magazine magazine)
         {
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer)
@@ -344,21 +344,15 @@ namespace RealismCommonLib.Patches
     //edge cases for current mag reload
     public class SetMagTypeNewPatch : ModulePatch
     {
-        private static FieldInfo _playerField;
-        private static FieldInfo faField;
-
         protected override MethodBase GetTargetMethod()
         {
-            _playerField = AccessTools.Field(typeof(WeaponStatSubclass), "Player_0");
-            faField = AccessTools.Field(typeof(WeaponStatSubclass), "FirearmsAnimator_0");
             return typeof(MagReloadClass).GetMethod("Start", new Type[] { typeof(WeaponEventHandlerClass), typeof(Callback) });
         }
 
         [PatchPostfix]
         private static void PatchPostfix(MagReloadClass __instance)
         {
-            Player player = (Player)_playerField.GetValue(__instance);
-            if (player.IsYourPlayer)
+            if (__instance.Player.IsYourPlayer)
             {
                 if (PluginConfig.EnableReloadLogging.Value == true) Logger.LogWarning("===SetMagTypeNew===");
             }

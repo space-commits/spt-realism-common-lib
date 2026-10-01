@@ -4,7 +4,7 @@ using EFT.Animations;
 using System.Numerics;
 using UnityEngine;
 using static RealismCommonLib.Plugin;
-using WeaponSkills = EFT.SkillManager.GClass2250;
+using WeaponSkills = EFT.SkillManager.WeaponBuffsInfo;
 
 namespace RealismCommonLib.StateControllers.InstanceState
 {
