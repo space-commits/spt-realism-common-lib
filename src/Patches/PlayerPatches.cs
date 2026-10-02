@@ -196,12 +196,12 @@ namespace RealismCommonLib.Patches
             if (__instance.MovementContext.IsSprintEnabled)
             {
                 float multiplier = StatModifiers.SprintSpeedModifier.Apply(1f);
-                motion *= multiplier * PluginConfig.test2.Value;
+                motion *= multiplier;
             }
             else
             {
                 float multiplier = StatModifiers.WalkSpeedModifier.Apply(1f);
-                motion *= multiplier * PluginConfig.test1.Value;
+                motion *= multiplier;
             }
 
         }

@@ -165,6 +165,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         public void ResetProceduralState()
         {
             Player.ProceduralWeaponAnimation.OnAimOrPoseChanged();
+            FirearmController?.UpdateHipInaccuracy();
         }
 
         //TODO this should not be opionated, should only calculate the raw % stamina
