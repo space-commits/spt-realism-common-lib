@@ -12,8 +12,8 @@ namespace RealismCommonLib
     [BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string MOD_GUID = "com.fontaine.realismCommonlib";
-        public const string MOD_NAME = "Realism-CommonLib";
+        public const string MOD_GUID = "com.fontaine.spt-realism-common-lib";
+        public const string MOD_NAME = "Fontaine-SPTRealismCommon-Lib";
         public const string MOD_VERSION = "0.0.2";
 
         //common lib's state and controller instances
