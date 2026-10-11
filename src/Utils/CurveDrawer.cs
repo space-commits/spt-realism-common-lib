@@ -173,6 +173,22 @@ namespace RealismCommonLib.Utils
             return null;
         }
 
+        public static AnimationCurve? GetCurve(string name, CurveAxis axis)
+        {
+            if (!Curves.TryGetValue(name, out var curve))
+                return null;
+
+            AnimationCurve sourceCurve = axis switch
+            {
+                CurveAxis.X => curve.XCurve,
+                CurveAxis.Y => curve.YCurve,
+                CurveAxis.Z => curve.ZCurve,
+                _ => throw new ArgumentOutOfRangeException(nameof(axis), axis, "Unknown curve axis.")
+            };
+
+            return new AnimationCurve(sourceCurve.keys);
+        }
+
         // -------------------------
         // INPUT (call from Update)
         // -------------------------

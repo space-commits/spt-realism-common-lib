@@ -48,7 +48,6 @@ namespace RealismCommonLib.Patches
 
             if (player.IsYourPlayer)
             {
-                Logger.LogInfo($"SetAimPatch called, IsAiming={__instance.IsAiming}, PlayerCanAim={Plugin.AimStateInstance.PlayerCanAim}");
                 PlayerEvents.RaiseOnAimStateChanged();
             }
         }

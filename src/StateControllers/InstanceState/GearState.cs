@@ -29,6 +29,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             PlayerEvents.ToggleHeadDevice += CheckGear;
             InputEvents.ChangeScopeInput += CheckGear;
             InputEvents.ChangeScopeMagnificationInput += CheckGear;
+            PlayerEvents.OnWeaponEquipped += CheckGear;
+            WeaponStateInstance.OnWeaponStateChanged += CheckGear;
         }
 
         void OnDestroy()
@@ -38,6 +40,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             PlayerEvents.ToggleHeadDevice -= CheckGear;
             InputEvents.ChangeScopeInput -= CheckGear;
             InputEvents.ChangeScopeMagnificationInput -= CheckGear;
+            PlayerEvents.OnWeaponEquipped -= CheckGear;
+            WeaponStateInstance.OnWeaponStateChanged -= CheckGear;
         }
 
         public void CheckGear()
