@@ -159,6 +159,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public float BaseMeleePen { get; set; } = 0f;
 
+        public Weapon.EReloadMode WeaponReloadType { get ; internal set; }
+
         //this should only return BSG aim speed if attahcment overhaul is not present, but should still be factored by health state
         //it needs to factor adrenaline, stamina, injury, weapon stats, weapon sight, etc. as calculated previously
         public float TotalFinalAimSpeed
@@ -215,7 +217,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             bool hasShoulderContact = false;
             IEnumerable<ProtrudableComponent> protrudableComponents = Enumerable.Empty<ProtrudableComponent>();
-            if (InteractionsHandlerClass.CanFold(weapon, out var foldable))
+            if (ItemManipulator.CanFold(weapon, out var foldable))
             {
                 if (foldable.FoldedSlot == null)
                 {
@@ -223,12 +225,12 @@ namespace RealismCommonLib.StateControllers.InstanceState
                 }
                 else if (foldable.FoldedSlot.ContainedItem != null)
                 {
-                    protrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(foldable.FoldedSlot.ContainedItem).ToArray();
+                    protrudableComponents = ItemExtensions.GetItemComponentsInChildren<ProtrudableComponent>(foldable.FoldedSlot.ContainedItem).ToArray();
                     hasShoulderContact |= !foldable.Folded && protrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
                 }
             }
 
-            IEnumerable<ProtrudableComponent> remainingProtrudableComponents = GClass3380.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
+            IEnumerable<ProtrudableComponent> remainingProtrudableComponents = ItemExtensions.GetItemComponentsInChildren<ProtrudableComponent>(weapon).Except(protrudableComponents);
             hasShoulderContact |= remainingProtrudableComponents.Any((ProtrudableComponent x) => x.IsProtruding());
 
             _hasShoulderContact = hasShoulderContact;
@@ -240,8 +242,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// </summary>
         public void UpdateWeaponStateOnStateChange(FirearmController fc)
         {
-            ModLogger.LogWarning($"UpdateWeaponStateOnStateChange");
-
             TotalWeaponWeight = fc.Item.TotalWeight;
             WeaponLength = fc.Item.CalculateCellSize().X;
 
@@ -256,6 +256,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
             //this ensures that external callers get triggered after the weapon state is updated, so they can use the updated values
             RaiseOnWeaponStateChanged(fc);
+
+            SetWeaponImmutableState(fc);
         }
 
         /// <summary>
@@ -264,8 +266,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// </summary>
         public void SetWeaponImmutableState(FirearmController fc)
         {
-            _isPistol = fc.Item.WeapClass.ToLower() == "pistol";
-            _isShotgun = fc.Item.WeapClass.ToLower() == "shotgun";
+            _isPistol = fc.Weapon.WeapClass.ToLower() == "pistol";
+            _isShotgun = fc.Weapon.WeapClass.ToLower() == "shotgun";
+            WeaponReloadType = fc.Weapon.ReloadMode;
         }
     }
 }

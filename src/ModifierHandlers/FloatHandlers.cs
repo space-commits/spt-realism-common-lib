@@ -54,6 +54,7 @@ namespace RealismCommonLib.ModifierHandlers
         public static readonly FloatMultiplierSet NewMagReloadSpeed = new();
         public static readonly FloatMultiplierSet CurrentMagRemoveSpeed = new();
         public static readonly FloatMultiplierSet InternalReloadModifier = new();
+        public static readonly FloatMultiplierSet RevolverReloadModifier = new();
 
         //Movement speed
         public static readonly FloatMultiplierSet WalkSpeedModifier = new();

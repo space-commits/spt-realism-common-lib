@@ -1,15 +1,52 @@
-﻿using Comfort.Common;
-using RealismCommonLib.ModifierHandlers;
+﻿using RealismCommonLib.ModifierHandlers;
 using UnityEngine;
 using EFT;
-using EFT.InventoryLogic;
 using HarmonyLib;
 using RealismCommonLib.Events;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using static EFT.Player;
+using static RealismCommonLib.Plugin;
+
+
 
 namespace RealismCommonLib.Patches
 {
+    public class InventoryOpenPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(Player).GetMethod("SetInventoryOpened", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        [PatchPrefix]
+        private static void PatchPrefix(Player __instance, bool opened)
+        {
+            if (__instance.IsYourPlayer)
+            {
+                AbstractHandsController controller = (AbstractHandsController)AccessTools.Field(typeof(Player), "_handsController").GetValue(__instance);
+
+                if (controller != null)
+                {
+                    if (opened)
+                    {
+                        PlayerEvents.RaiseOnInventoryOpened();
+                        PlayerStateInstance.IsInInventory = true;
+                    }
+                    else
+                    {
+                        PlayerEvents.RaiseOnInventoryClosed();
+                        PlayerStateInstance.IsInInventory = false;
+                    }
+                }
+                else
+                {
+                  PlayerStateInstance.IsInInventory = false;
+                }
+            }
+        }
+    }
+
     public class OnItemAddedOrRemovedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -40,8 +77,7 @@ namespace RealismCommonLib.Patches
         {
             if (__instance.IsYourPlayer)
             {
-                PlayerEvents.RaiseOnPlayerInitArgs(__instance);
-                PlayerEvents.RaiseOnPlayerInit();
+                PlayerEvents.RaiseOnPlayerInit(__instance);
             }
             else
             {
@@ -141,59 +177,6 @@ namespace RealismCommonLib.Patches
     //     }
     // }
 
-    public class TryProceedPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(Player), nameof(Player.TryProceed));
-        }
-
-        [PatchPrefix]
-        private static void Prefix(Player __instance, Item item)
-        {
-            if (!__instance.IsYourPlayer) return;
-
-            PlayerEvents.RaiseOnAnyItemEquipped();
-            Logger.LogWarning($"SetItemInHandsPatch: RaiseOnAnyItemEquipped");
-
-            if (item is Weapon weapon)
-            {
-                if ( Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null && weapon.TemplateId != Plugin.PlayerStateInstance.PreviouslyEquippedGunId)
-                {
-                    PlayerEvents.RaiseOnWeaponSwap();
-                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnWeaponSwap");
-                }      
-                else if (Plugin.PlayerStateInstance.PreviouslyEquippedItemId != null && Plugin.PlayerStateInstance.PreviouslyEquippedGunId == null)
-                {
-                    PlayerEvents.RaiseOnSwappedFromItemToGun();
-                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnSwappedFromItemToGun");
-                }
-
-                PlayerEvents.RaiseEquippedWeapon();
-                Logger.LogWarning($"SetItemInHandsPatch: RaiseEquippedWeapon");
-
-                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = weapon.TemplateId;
-                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = null;
-            }
-            else
-            {
-                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null)
-                {
-                    PlayerEvents.RaiseOnSwappedFromGunToItem();
-                    Logger.LogWarning($"SetItemInHandsPatch: RaiseOnSwappedFromGunToItem");
-                }
-
-                PlayerEvents.RaiseEquippedNonWeaponItem();
-                Logger.LogWarning($"SetItemInHandsPatch: RaiseEquippedNonWeaponItem");
-
-                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = null;
-                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = item.TemplateId;
-            }
-
-            Logger.LogWarning($"SetItemInHandsPatch: item={item?.TemplateId}, previouslyEquippedItem={Plugin.PlayerStateInstance.PreviouslyEquippedItemId}, previouslyEquippedGun={Plugin.PlayerStateInstance.PreviouslyEquippedGunId}");
-        }
-    }
-
     public class ApplyMotionPatch : ModulePatch
     {
         private static FieldInfo _playerField;
@@ -213,12 +196,12 @@ namespace RealismCommonLib.Patches
             if (__instance.MovementContext.IsSprintEnabled)
             {
                 float multiplier = StatModifiers.SprintSpeedModifier.Apply(1f);
-                motion *= multiplier * PluginConfig.test2.Value;
+                motion *= multiplier;
             }
             else
             {
                 float multiplier = StatModifiers.WalkSpeedModifier.Apply(1f);
-                motion *= multiplier * PluginConfig.test1.Value;
+                motion *= multiplier;
             }
 
         }
@@ -242,8 +225,8 @@ namespace RealismCommonLib.Patches
 
             if (__instance.IsSprintEnabled)
                 __result *= StatModifiers.SprintSpeedModifier.Apply(1f);
-            else
-                __result *= StatModifiers.WalkSpeedModifier.Apply(1f);
+            // else
+            //     __result *= StatModifiers.WalkSpeedModifier.Apply(1f);
         }
     }
 
@@ -255,14 +238,14 @@ namespace RealismCommonLib.Patches
         }
 
         [PatchPrefix]
-        private static void Prefix(PlayerAnimator __instance, ref float charaterMovementSpeed)
+        private static void Postfix(PlayerAnimator __instance, ref float charaterMovementSpeed)
         {
             if (Plugin.PlayerStateInstance == null) return;
             Player player = Plugin.PlayerStateInstance.Player;
             if (player == null) return;
             if (player.MovementContext.PlayerAnimator != __instance) return;
 
-            charaterMovementSpeed *= StatModifiers.WalkSpeedModifier.Apply(1f);
+            charaterMovementSpeed = StatModifiers.WalkSpeedModifier.Apply(charaterMovementSpeed);
         }
     }
 

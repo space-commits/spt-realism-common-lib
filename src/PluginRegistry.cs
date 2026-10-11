@@ -16,18 +16,18 @@ namespace RealismCommonLib
 
         internal static void DetectPlugins()
         {
-/*            AttachmentOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.attachmentoverhaul");
-            MedicalOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.medicaloverhaul");
-            StanceOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.stanceoverhaul");
-            RecoilOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.recoiloverhaul");
-            BallisticsOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.ballisticsoverhaul");
-            GearOverhaulIsEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.gearoverhaul");*/
+            //AttachmentOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.attachmentoverhaul");
+            //MedicalOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.medicaloverhaul");
+            StanceOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.spt-stance-overhaul");
+            //RecoilOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.recoiloverhaul");
+            //BallisticsOverhaulEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.ballisticsoverhaul");
+            //GearOverhaulIsEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.gearoverhaul");
             FOVFixEnabled = Chainloader.PluginInfos.ContainsKey("com.fontaine.fovfix");
             //FikaIsPresent = Chainloader.PluginInfos.ContainsKey("com.fika.fika");
 
             Plugin.ModLogger.LogWarning(FOVFixEnabled
-                 ? "FOVFixEnabled detected."
-                 : "FOVFixEnabled not detected.");
+                 ? "Realism CommonLib: FOVFix detected."
+                 : "");
         }
     }
 }

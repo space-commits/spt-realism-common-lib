@@ -10,7 +10,7 @@ namespace RealismCommonLib.Events
         /// <summary>
         /// Fires when the player is initialized, providing the Player instance as an argument.
         /// </summary>
-        public static event Action<Player>? OnPlayerInitArgs;
+        public static event Action<Player>? OnPlayerInitRef;
 
         /// <summary>
         /// Fires when the player is initialized, does not pass Palyer instance.
@@ -40,19 +40,29 @@ namespace RealismCommonLib.Events
 
         public static event Action? OnNonWeaponEquipped;
 
+        public static event Action? OnInventoryOpened;
+
+        public static event Action? OnInventoryClosed;
+
+        internal static void RaiseOnInventoryOpened()
+        {
+            BaseEventHandler.RaiseEvent(OnInventoryOpened);
+        }
+
+        internal static void RaiseOnInventoryClosed()
+        {
+            BaseEventHandler.RaiseEvent(OnInventoryClosed);
+        }
+
         internal static void RaiseOnAimStateChanged()
         {
             BaseEventHandler.RaiseEvent(AimStateChanged);
         }
 
-        internal static void RaiseOnPlayerInit()
+        internal static void RaiseOnPlayerInit(Player player)
         {
+            BaseEventHandler.RaiseEvent(OnPlayerInitRef, player);
             BaseEventHandler.RaiseEvent(OnPlayerInit);
-        }
-
-        internal static void RaiseOnPlayerInitArgs(Player player)
-        {
-            BaseEventHandler.RaiseEvent(OnPlayerInitArgs, player);
         }
 
         internal static void RaiseOnItemAddedOrRemoved()

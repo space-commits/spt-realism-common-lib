@@ -20,7 +20,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.FirearmController.autoFireOn;
+                return PlayerStateInstance?.FirearmController?.autoFireOn ?? false;
             }
         }
 
@@ -75,7 +75,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         void Update()
         {
-            if (PlayerStateInstance?.FirearmController == null) return;
+            if (PlayerStateInstance?.FirearmController == null || !PlayerStateInstance.WeaponIsReady) return;
             UpdateFiringState();
         }
 

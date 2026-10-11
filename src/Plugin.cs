@@ -12,9 +12,9 @@ namespace RealismCommonLib
     [BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string MOD_GUID = "com.fontaine.realismCommonlib";
-        public const string MOD_NAME = "Realism-CommonLib";
-        public const string MOD_VERSION = "1.0.0";
+        public const string MOD_GUID = "com.fontaine.spt-realism-common-lib";
+        public const string MOD_NAME = "Fontaine-SPTRealismCommon-Lib";
+        public const string MOD_VERSION = "0.0.2";
 
         //common lib's state and controller instances
         public static GameState GameStateInstance;
@@ -60,7 +60,7 @@ namespace RealismCommonLib
             RealismCommonLib.Utils.CurveDrawer.DrawGUI();
         }
 
-        void EnablePatches() 
+        void EnablePatches()
         {
             //Input
             new KeyInputPatch1().Enable();
@@ -68,9 +68,13 @@ namespace RealismCommonLib
             new NVGTogglePatch().Enable();
             new ThermalTogglePatch().Enable();
             new FaceShieldTogglePatch().Enable();
+            //new TryProceedPatch().Enable();
+            new HandsControllerChangedPatch().Enable();
+
 
             //Aiming
             new ToggleAimPatch().Enable();
+            new SetAimPatch().Enable();
 
             //Shooting
             new ShootPatch().Enable();
@@ -82,7 +86,7 @@ namespace RealismCommonLib
             new ApplyMotionPatch().Enable();
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
-            new TryProceedPatch().Enable();
+            new InventoryOpenPatch().Enable();
 
             //PWA Patches
             new UpdateWeaponVariablesPatch().Enable();
@@ -106,6 +110,9 @@ namespace RealismCommonLib
             new SetMagTypeNewPatch().Enable();
             new SetMagInWeaponPatch().Enable();
             new SetSpeedParametersPatch().Enable();
+
+            //Weapon
+            new WeaponConstructorPatch().Enable();
         }
 
         void InstantiateInstanceControllers()
@@ -114,10 +121,10 @@ namespace RealismCommonLib
             InitGlobalComponents(this.gameObject);
 
             //this handles adding player-scoped components on player init.
-            PlayerEvents.OnPlayerInitArgs += InitPlayerComponents;
+            PlayerEvents.OnPlayerInitRef += InitPlayerComponents;
         }
 
-        private void InitGlobalComponents(GameObject go) 
+        private void InitGlobalComponents(GameObject go)
         {
             GameStateInstance = go.gameObject.AddComponent<GameState>();
             AudioControllerInstance = go.gameObject.AddComponent<AudioState>();

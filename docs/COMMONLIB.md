@@ -1,4 +1,4 @@
-# RealismCommonLib Project Instructions
+# spt-realism-common-lib Project Instructions
 
 ## Purpose
 Shared infrastructure library for BepInEx mods targeting SPT. Provides common framework for patches, events, state management, configuration, and plugin lifecycle. Reduces complexity, improves compatibility, enables shared functionality across mods.
@@ -14,7 +14,7 @@ Shared infrastructure library for BepInEx mods targeting SPT. Provides common fr
 
 ## Project Structure
 ```
-RealismCommonLib/
+spt-realism-common-lib/
 ├── Plugin.cs                    # BepInEx plugin entry point, patch initialization, static singletons
 ├── PluginConfig.cs              # Configuration bindings and defaults
 ├── PluginRegistry.cs            # Detects other loaded mods by BepInEx GUID

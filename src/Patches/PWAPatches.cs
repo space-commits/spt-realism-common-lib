@@ -39,14 +39,12 @@ namespace RealismCommonLib.Patches
     {
         private static FieldInfo _playerField;
         private static FieldInfo _fcField;
-        private static FieldInfo _float3Field;
 
         protected override MethodBase GetTargetMethod()
         {
-            _float3Field = AccessTools.Field(typeof(Player.FirearmController), "float_3");
             _playerField = AccessTools.Field(typeof(FirearmController), "_player");
             _fcField = AccessTools.Field(typeof(ProceduralWeaponAnimation), "_firearmController");
-            return typeof(EFT.Animations.ProceduralWeaponAnimation).GetMethod("method_23", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(EFT.Animations.ProceduralWeaponAnimation).GetMethod("OnAimOrPoseChanged", BindingFlags.Instance | BindingFlags.Public);
         }
 
         [PatchPostfix]

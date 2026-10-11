@@ -29,14 +29,15 @@ namespace RealismCommonLib.Utils
 
     public class TimeGate
     {
-        private float _interval;
         private float _elapsed;
+
+        public float Interval { get; set; }
 
         public bool IsActive { get; set; } = false;
 
         public TimeGate(float interval)
         {
-            _interval = interval;
+            Interval = interval;
         }
 
         public void Reset()
@@ -48,7 +49,7 @@ namespace RealismCommonLib.Utils
         public void Update()
         {
             _elapsed += Time.deltaTime;
-            if (_elapsed >= _interval)
+            if (_elapsed >= Interval)
             {
                 _elapsed = 0f;
                 IsActive = false;
@@ -58,13 +59,15 @@ namespace RealismCommonLib.Utils
 
     public class DelayTimer
     {
-        private readonly float _duration;
         private float _elapsed;
         private bool _active;
 
+        public float Duration { get; set; }
+        public bool IsActive => _active;
+
         public DelayTimer(float duration)
         {
-            _duration = duration;
+            Duration = duration;
         }
 
         public void Start()
@@ -85,7 +88,7 @@ namespace RealismCommonLib.Utils
 
             _elapsed += Time.deltaTime;
 
-            if (_elapsed >= _duration)
+            if (_elapsed >= Duration)
             {
                 _active = false;
                 return true;

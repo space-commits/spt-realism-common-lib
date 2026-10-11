@@ -33,6 +33,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public Player Player { get; set; }
 
+        public bool IsInInventory { get; set; }
+
         public FirearmController? FirearmController
         {
             get
@@ -90,6 +92,14 @@ namespace RealismCommonLib.StateControllers.InstanceState
             get
             {
                 return Player.MovementContext.StationaryWeapon != null;
+            }
+        }
+
+        public bool IsMounting
+        {
+            get
+            {
+                return Player.MovementContext.IsInMountedState;
             }
         }
 
@@ -154,7 +164,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// </summary>
         public void ResetProceduralState()
         {
-            Player.ProceduralWeaponAnimation.method_23();
+            Player.ProceduralWeaponAnimation.OnAimOrPoseChanged();
+            FirearmController?.UpdateHipInaccuracy();
         }
 
         //TODO this should not be opionated, should only calculate the raw % stamina
@@ -187,9 +198,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
         /// <summary>
         /// Sets MovementContext.SpeedLimitIsDirty to true, which forces speed limit to update. Do not call in update.
         /// </summary>
-        public void UpdateWalkSpeedLimits()
-        {
-            Player.MovementContext.SpeedLimitIsDirty = true;
-        }
+        // public void UpdateWalkSpeedLimits()
+        // {
+        //     Player.MovementContext.SpeedLimitIsDirty = true;
+        // }
     }
 }

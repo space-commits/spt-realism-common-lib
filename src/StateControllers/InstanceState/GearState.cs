@@ -29,6 +29,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             PlayerEvents.ToggleHeadDevice += CheckGear;
             InputEvents.ChangeScopeInput += CheckGear;
             InputEvents.ChangeScopeMagnificationInput += CheckGear;
+            PlayerEvents.OnWeaponEquipped += CheckGear;
+            WeaponStateInstance.OnWeaponStateChanged += CheckGear;
         }
 
         void OnDestroy()
@@ -38,6 +40,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             PlayerEvents.ToggleHeadDevice -= CheckGear;
             InputEvents.ChangeScopeInput -= CheckGear;
             InputEvents.ChangeScopeMagnificationInput -= CheckGear;
+            PlayerEvents.OnWeaponEquipped -= CheckGear;
+            WeaponStateInstance.OnWeaponStateChanged -= CheckGear;
         }
 
         public void CheckGear()
@@ -53,8 +57,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
             FaceShieldIsActive = fsComponent != null && (fsComponent.Togglable == null || fsComponent.Togglable.On);
             NVGIsActive = nvgComponent != null && (nvgComponent.Togglable == null || nvgComponent.Togglable.On);
             ThermalIsActive = thermComponent != null && (thermComponent.Togglable == null || thermComponent.Togglable.On);
-
-            ModLogger.LogWarning($"GearState: FaceShieldIsActive={FaceShieldIsActive}, NVGIsActive={NVGIsActive}, ThermalIsActive={ThermalIsActive}");
 
             PlayerStateInstance.FirearmController?.UpdateHipInaccuracy();
         }

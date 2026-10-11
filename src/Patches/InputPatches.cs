@@ -5,12 +5,12 @@ using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
-using InputClass1 = Class1730;
-using InputClass2 = Class1728;
+using InputClass1 = EFT.FirearmHandsInputTranslator;
+using InputClass2 = EFT.MoveInputTranslator;
 using EFT;
-using static RealismCommonLib.Plugin;
 using HarmonyLib;
-
+using EFT.InventoryLogic;
+using static RealismCommonLib.Plugin;
 
 namespace RealismCommonLib.Patches
 {
@@ -213,6 +213,55 @@ namespace RealismCommonLib.Patches
                 return;
 
             PlayerEvents.RaiseToggleHeadDevice();
+        }
+    }
+
+    
+    public class HandsControllerChangedPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.PropertySetter(typeof(Player), nameof(Player.HandsController));
+        }
+
+        [PatchPrefix]
+        private static void Prefix(Player __instance, Player.AbstractHandsController value)
+        {
+            if (!__instance.IsYourPlayer) return;
+
+            Item? newItem = value?.Item;
+            if (newItem == null) return;
+            
+            PlayerEvents.RaiseOnAnyItemEquipped();
+
+            if (newItem is Weapon weapon)
+            {
+                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null && weapon.TemplateId != Plugin.PlayerStateInstance.PreviouslyEquippedGunId)
+                {
+                    PlayerEvents.RaiseOnWeaponSwap();
+                }
+                else if (Plugin.PlayerStateInstance.PreviouslyEquippedItemId != null && Plugin.PlayerStateInstance.PreviouslyEquippedGunId == null)
+                {
+                    PlayerEvents.RaiseOnSwappedFromItemToGun();
+                }
+
+                PlayerEvents.RaiseEquippedWeapon();
+
+                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = weapon.TemplateId;
+                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = null;
+            }
+            else
+            {
+                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null)
+                {
+                    PlayerEvents.RaiseOnSwappedFromGunToItem();
+                }
+
+                PlayerEvents.RaiseEquippedNonWeaponItem();
+
+                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = null;
+                Plugin.PlayerStateInstance.PreviouslyEquippedItemId = newItem?.TemplateId;
+            }
         }
     }
 }
