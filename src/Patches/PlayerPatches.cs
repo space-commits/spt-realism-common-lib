@@ -249,6 +249,47 @@ namespace RealismCommonLib.Patches
         }
     }
 
+    /// <summary>
+    /// MovementContext.SetTilt is the single place the player's real tilt is written (clamped to [-5, 5], left is negative).
+    /// The lean key (Player.ToggleLean) requests +-5, the incremental lean (Player.SlowLean) creeps towards it in 0.1 steps,
+    /// and MovementState.SetTilt may reduce the request (e.g. leaning into a wall) before it gets here, so this sees the
+    /// lean that actually happened rather than the input.
+    /// </summary>
+    public class SetTiltPatch : ModulePatch
+    {
+        private const float FullLeftTilt = -5f;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.SetTilt));
+        }
+
+        [PatchPostfix]
+        private static void Postfix(MovementContext __instance)
+        {
+            if (Plugin.PlayerStateInstance == null) return;
+            Player player = Plugin.PlayerStateInstance.Player;
+            if (player == null || player.MovementContext != __instance) return;
+
+            bool atFullLeftTilt = Mathf.Approximately(__instance.Tilt, FullLeftTilt);
+
+            if (!Plugin.PlayerStateInstance.IsFullyLeaningLeft)
+            {
+                // Only the lean key counts, an incremental lean that creeps all the way to -5 does not
+                if (!atFullLeftTilt || player.CurrentLeanType != LeanType.NormalLean) return;
+
+                Plugin.PlayerStateInstance.IsFullyLeaningLeft = true;
+                PlayerEvents.RaiseOnFullLeftLeanChanged(true);
+            }
+            else if (!atFullLeftTilt)
+            {
+                // Anything that moves the tilt off full left ends it: lean key released, lean right, sprint, jump, ...
+                Plugin.PlayerStateInstance.IsFullyLeaningLeft = false;
+                PlayerEvents.RaiseOnFullLeftLeanChanged(false);
+            }
+        }
+    }
+
     public class SetCharacterSprintSpeedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

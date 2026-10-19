@@ -8,7 +8,6 @@ namespace RealismCommonLib.StateControllers.InstanceState
 {
     public class GearState : MonoBehaviour
     {
-
         public bool HasGasMask { get; private set; }
 
         public bool FaceShieldIsActive { get; private set; }

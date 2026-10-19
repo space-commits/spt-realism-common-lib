@@ -2,10 +2,12 @@
 using BepInEx.Logging;
 using RealismCommonLib.Patches;
 using UnityEngine;
+using System.Text;
 using RealismCommonLib.StateControllers.InstanceState;
 using RealismCommonLib.StateControllers.GlobalState;
 using EFT;
 using RealismCommonLib.Events;
+using EFT.InputSystem;
 
 namespace RealismCommonLib
 {
@@ -53,6 +55,52 @@ namespace RealismCommonLib
             FPSFactor = GetFPSFactor();
 
             RealismCommonLib.Utils.CurveDrawer.HandleInput();
+
+
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                Dump(PlayerStateInstance.Player.PlayerBones);
+            }
+        }
+
+        static BodyPartCollider FindOwner(Transform t)
+        {
+            for (; t != null; t = t.parent)
+            {
+                var c = t.GetComponent<BodyPartCollider>();   // works on inactive objects too
+                if (c != null) return c;
+            }
+            return null;
+        }
+
+        static string P(Transform t, Transform root)
+        {
+            var s = t.name;
+            for (t = t.parent; t != null && t != root; t = t.parent) s = t.name + "/" + s;
+            return s;
+        }
+
+        static void Dump(PlayerBones bones)
+        {
+            var root = bones.transform;
+            var sb = new StringBuilder($"== PlayerBones {bones.name} ==\n");
+            foreach (var c in bones.GetComponentsInChildren<Collider>(true))
+            {
+                var own = c.GetComponent<BodyPartCollider>();
+                var up = FindOwner(c.transform);
+                var plate = up as ArmorPlateCollider;
+                sb.AppendLine(string.Join(" | ", new[] {
+            P(c.transform, root), c.GetType().Name,
+            $"layer={LayerMask.LayerToName(c.gameObject.layer)}{(c.gameObject.layer == LayersMaskController.HitColliderLayer ? "(HIT)" : "")}",
+            $"enabled={c.enabled} self={c.gameObject.activeSelf} hier={c.gameObject.activeInHierarchy}",
+            own != null ? $"OWN={own.GetType().Name}/{own.BodyPartColliderType}" : "OWN=none",
+            up  != null ? $"UP={P(up.transform, root)}/{up.BodyPartColliderType}/{(plate != null ? plate.ArmorPlateColliderType.ToString() : "-")}/isMain={up.Collider == c}/bridge={up.playerBridge != null}" : "UP=none",
+            $"inHashSet={bones.BodyPartCollidersHashSet.Contains(c)}",
+            c is BoxCollider b ? $"center={b.center} size={b.size}" : "",
+            $"lpos={c.transform.localPosition} lrot={c.transform.localEulerAngles} lscale={c.transform.localScale}"
+        }));
+            }
+            ModLogger.LogWarning(sb.ToString());
         }
 
         void OnGUI()
@@ -74,7 +122,7 @@ namespace RealismCommonLib
 
             //Aiming
             new ToggleAimPatch().Enable();
-            new SetAimPatch().Enable();
+            new AimingChangedPatch().Enable();
 
             //Shooting
             new ShootPatch().Enable();
@@ -86,6 +134,7 @@ namespace RealismCommonLib
             new ApplyMotionPatch().Enable();
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
+            new SetTiltPatch().Enable();
             new InventoryOpenPatch().Enable();
 
             //PWA Patches

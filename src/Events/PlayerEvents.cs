@@ -44,6 +44,17 @@ namespace RealismCommonLib.Events
 
         public static event Action? OnInventoryClosed;
 
+        /// <summary>
+        /// Fires when the player's actual tilt reaches or leaves a full left lean (the lean key, not the
+        /// incremental lean). True = now fully leaning left, false = no longer fully leaning left.
+        /// </summary>
+        public static event Action<bool>? OnFullLeftLeanChanged;
+
+        internal static void RaiseOnFullLeftLeanChanged(bool isFullyLeaningLeft)
+        {
+            BaseEventHandler.RaiseEvent(OnFullLeftLeanChanged, isFullyLeaningLeft);
+        }
+
         internal static void RaiseOnInventoryOpened()
         {
             BaseEventHandler.RaiseEvent(OnInventoryOpened);

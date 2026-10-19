@@ -103,6 +103,11 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
+        /// <summary>
+        /// True while the player is fully leaning left via the lean key (not the incremental lean). Set by SetTiltPatch.
+        /// </summary>
+        public bool IsFullyLeaningLeft { get; internal set; }
+
         public bool IsInventoryOpen
         {
             get
