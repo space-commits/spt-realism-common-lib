@@ -37,11 +37,19 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        public float StrengthWeightBuff
+        public float StrengthLevel
         {
             get
             {
-                return PlayerStateInstance.Player.Skills.StrengthBuffLiftWeightInc.Value;
+                return PlayerStateInstance.Player.Skills.Strength.Level; 
+            }
+        }
+
+        public float EndurancLevel
+        {
+            get
+            {
+                return PlayerStateInstance.Player.Skills.Endurance.Level; 
             }
         }
 

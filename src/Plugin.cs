@@ -44,7 +44,6 @@ namespace RealismCommonLib
             ModLogger = Logger;
             PluginConfig.InitConfigBindings(Config);
             PluginConfig.InitTempBindings(Config);
-            PluginRegistry.DetectPlugins();
             EnablePatches();
             InstantiateInstanceControllers();
         }

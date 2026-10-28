@@ -9,6 +9,7 @@ Shared infrastructure library for BepInEx mods targeting SPT. Provides common fr
 - **State management**: MonoBehaviour-based state controllers for player, weapon, health, reload, audio state
 - **Configuration system**: PluginConfig.cs with ConfigFile bindings and modifier system
 - **Plugin registry**: PluginRegistry detects and manages dependent mods via BepInEx GUID
+- **Module services**: contracts (interfaces) that let sibling modules read each other's data without referencing each other's DLLs (see "Cross-Module Data")
 - **Modifier system**: FloatMultiplierSet (stacked float multipliers) and BoolGateSet (compound boolean gates) for runtime gameplay value modification
 - **PatchPipeline**: Veto/Override pattern for coordinating behavior across mods/handlers without tight coupling
 
@@ -17,7 +18,10 @@ Shared infrastructure library for BepInEx mods targeting SPT. Provides common fr
 spt-realism-common-lib/
 ├── Plugin.cs                    # BepInEx plugin entry point, patch initialization, static singletons
 ├── PluginConfig.cs              # Configuration bindings and defaults
-├── PluginRegistry.cs            # Detects other loaded mods by BepInEx GUID
+├── PluginRegistry.cs            # Detects other loaded mods by BepInEx GUID (lazy getters, don't read in Awake)
+├── Integration/
+│   ├── ModuleServices.cs        # Register<T>/TryGet<T> registry + typed accessors returning null objects
+│   └── IStanceInfo.cs           # Stance contract (provided by Stance-Overhaul) + NullStanceInfo
 ├── ConfigurationManagerAttributes.cs  # Config manager UI hints
 ├── Events/
 │   ├── BaseEventHandler.cs      # Generic event raising with exception catching/logging
@@ -240,6 +244,34 @@ bool isPistol = WeaponStateInstance.TreatAsPistol;
 bool canAim = AimStateInstance.PlayerCanAim;
 bool isAiming = AimStateInstance.IsAiming;
 ```
+
+### Cross-Module Data (ModuleServices)
+Contracts live in the common lib (`src/Integration/`). The module that owns the data registers an implementation in its `Awake`; consumers read through a typed accessor, which returns a null object ("module not installed" values) when nothing is registered. Sibling modules never reference each other's assemblies, and load order doesn't matter because reads happen in raid.
+
+```csharp
+// provider (Stance-Overhaul Plugin.Awake)
+ModuleServices.Register<IStanceInfo>(new StanceInfoProvider());
+
+// consumer (e.g. FOV-Fix), never null
+bool altAim = ModuleServices.Stance.CanMoveGunToCamera;
+```
+
+| Contract | Provider | Members |
+|---|---|---|
+| `IStanceInfo` (`ModuleServices.Stance`) | Stance-Overhaul `StanceInfoProvider` | `CanMoveGunToCamera`, `IsLeftShoulder` |
+
+Rules:
+1. Contracts may only use common-lib, EFT, Unity or BCL types (e.g. no `EStanceType`, it lives in Stance-Overhaul; expose bools/weights instead).
+2. Each contract ships with an internal null object; add a typed accessor on `ModuleServices` that falls back to it.
+3. Keep contracts minimal: add members when a consumer needs them. Adding a member means rebuilding providers.
+4. Providers use Unity's null check (`!= null`) on MonoBehaviours, never `?.` (statics like `StanceControllerInstance` can point at destroyed components after a raid).
+5. Data every module cares about (weapon class, shoulder contact, firing state) goes on the common-lib state classes as settable properties (like `WeaponState.IsMachinePistol`), not on contracts. Modules push, the lib never references modules.
+6. Cross-module notifications go on a common-lib event class (like `PWAEvents`), raised by the provider.
+
+For third-party mods that can't register a provider, use an isolated soft-reference compat class: `Private=false` reference, `SoftDependency`, gate with `Chainloader.PluginInfos.ContainsKey`, keep all optional types inside `[MethodImpl(NoInlining)]` method bodies of one class.
+
+### PluginRegistry
+Flags are lazy getters over `Chainloader.PluginInfos`. Plugins that depend on the common lib aren't in `PluginInfos` during the common lib's `Awake`, so don't read these flags in any plugin's `Awake`.
 
 ## Dependencies
 - **External**: BepInEx, Harmony, SPT reflection/patching libraries (`SPT.Reflection`)
