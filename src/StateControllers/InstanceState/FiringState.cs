@@ -10,11 +10,11 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
     public class FiringState : MonoBehaviour
     {
-        private TimeGate _firingTimeGate = new TimeGate(PluginConfig.FiringResetDelay.Value);
-        private TimeGate _firingDeafenTimeGate = new TimeGate(PluginConfig.FiringDeafenResetDelay.Value);
-        private TimeGate _firingMovementTimeGate = new TimeGate(PluginConfig.FiringMovementResetDelay.Value);
-        private TimeGate _firingFromStanceTimeGate = new TimeGate(PluginConfig.FiringFromStanceResetDelay.Value);
-        private TimeGate _firingVisualRecoilTimeGate = new TimeGate(PluginConfig.FiringVisualResetDelay.Value);
+        private DelayTimer _firingTimer = new DelayTimer(PluginConfig.FiringResetDelay.Value);
+        private DelayTimer _firingDeafenTimer = new DelayTimer(PluginConfig.FiringDeafenResetDelay.Value);
+        private DelayTimer _firingMovementTimer = new DelayTimer(PluginConfig.FiringMovementResetDelay.Value);
+        private DelayTimer _firingFromStanceTimer = new DelayTimer(PluginConfig.FiringFromStanceResetDelay.Value);
+        private DelayTimer _firingVisualRecoilTimer = new DelayTimer(PluginConfig.FiringVisualResetDelay.Value);
 
         public bool AutoFireOn
         {
@@ -29,7 +29,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _firingTimeGate.IsActive || AutoFireOn;
+                return _firingTimer.IsActive || AutoFireOn;
             }
         }
 
@@ -37,7 +37,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _firingDeafenTimeGate.IsActive;
+                return _firingDeafenTimer.IsActive;
             }
         }
 
@@ -45,7 +45,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _firingMovementTimeGate.IsActive;
+                return _firingMovementTimer.IsActive;
             }
         }
 
@@ -53,7 +53,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _firingFromStanceTimeGate.IsActive;
+                return _firingFromStanceTimer.IsActive;
             }
         }
 
@@ -61,7 +61,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return _firingVisualRecoilTimeGate.IsActive;
+                return _firingVisualRecoilTimer.IsActive;
             }
         }
 
@@ -85,15 +85,15 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public void UpdateFiringState()
         {
-            _firingTimeGate.Update();
-            _firingDeafenTimeGate.Update();
-            _firingMovementTimeGate.Update();
-            _firingFromStanceTimeGate.Update();
-            _firingVisualRecoilTimeGate.Update();
+            _firingTimer.Update();
+            _firingDeafenTimer.Update();
+            _firingMovementTimer.Update();
+            _firingFromStanceTimer.Update();
+            _firingVisualRecoilTimer.Update();
 
             if (IsFiring) FiringDuration += Time.deltaTime;
 
-            if (!_firingTimeGate.IsActive && !AutoFireOn) ShotCount = 0;
+            if (!_firingTimer.IsActive && !AutoFireOn) ShotCount = 0;
 
             if (!AutoFireOn) FiringDuration = 0f;
 
@@ -105,11 +105,11 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
             ShotCount++;
 
-            _firingTimeGate.Reset();
-            _firingDeafenTimeGate.Reset();
-            _firingFromStanceTimeGate.Reset();
-            _firingMovementTimeGate.Reset();
-            _firingVisualRecoilTimeGate.Reset();
+            _firingTimer.Start();
+            _firingDeafenTimer.Start();
+            _firingFromStanceTimer.Start();
+            _firingMovementTimer.Start();
+            _firingVisualRecoilTimer.Start();
         }
     }
 }

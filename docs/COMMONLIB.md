@@ -64,7 +64,7 @@ spt-realism-common-lib/
     ├── CurveDrawer.cs           # Debug utility for visualizing AnimationCurves in-game
     ├── Gizmos.cs                # Debug gizmo drawing utilities
     ├── MathUtils.cs             # Vector clamping, float/vector comparison helpers
-    └── TimerUtils.cs            # TimeInterval, TimeGate, DelayTimer
+    └── TimerUtils.cs            # TimeInterval, DelayTimer
 ```
 
 ## Core Components
@@ -206,8 +206,7 @@ public void RunOnDestroy() =>
 ### Utils
 - **`Cloner.ShallowClone<T>(obj)`**: Invokes `MemberwiseClone` via reflection — used to clone game objects (e.g., Spring instances)
 - **`TimeInterval`**: Throttle-timer; `Ready()` returns true once per interval
-- **`TimeGate`**: One-shot timer that deactivates after duration; has `IsActive` flag
-- **`DelayTimer`**: Tracks elapsed time with Start/Stop
+- **`DelayTimer`**: One-shot timer; `Start()` opens an `IsActive` window for `Duration`, `Update()` returns true on the frame it expires, `Stop()` cancels early
 - **`MathUtils`**: `ClampVector`, `AreFloatsEqual`, `IsGreaterThan`, `IsLessThan` with epsilon tolerance
 - **`CurveDrawer`**: In-game debug overlay for visualizing AnimationCurve shapes
 
