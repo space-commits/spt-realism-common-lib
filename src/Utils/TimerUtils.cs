@@ -27,36 +27,6 @@ namespace RealismCommonLib.Utils
         }
     }
 
-    public class TimeGate
-    {
-        private float _elapsed;
-
-        public float Interval { get; set; }
-
-        public bool IsActive { get; set; } = false;
-
-        public TimeGate(float interval)
-        {
-            Interval = interval;
-        }
-
-        public void Reset()
-        {
-            _elapsed = 0f;
-            IsActive = true;
-        }
-
-        public void Update()
-        {
-            _elapsed += Time.deltaTime;
-            if (_elapsed >= Interval)
-            {
-                _elapsed = 0f;
-                IsActive = false;
-            }
-        }
-    }
-
     public class DelayTimer
     {
         private float _elapsed;

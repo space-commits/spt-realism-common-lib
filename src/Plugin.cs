@@ -2,10 +2,12 @@
 using BepInEx.Logging;
 using RealismCommonLib.Patches;
 using UnityEngine;
+using System.Text;
 using RealismCommonLib.StateControllers.InstanceState;
 using RealismCommonLib.StateControllers.GlobalState;
 using EFT;
 using RealismCommonLib.Events;
+using EFT.InputSystem;
 
 namespace RealismCommonLib
 {
@@ -14,7 +16,7 @@ namespace RealismCommonLib
     {
         public const string MOD_GUID = "com.fontaine.spt-realism-common-lib";
         public const string MOD_NAME = "Fontaine-SPTRealismCommon-Lib";
-        public const string MOD_VERSION = "0.0.2";
+        public const string MOD_VERSION = "0.0.3";
 
         //common lib's state and controller instances
         public static GameState GameStateInstance;
@@ -42,7 +44,6 @@ namespace RealismCommonLib
             ModLogger = Logger;
             PluginConfig.InitConfigBindings(Config);
             PluginConfig.InitTempBindings(Config);
-            PluginRegistry.DetectPlugins();
             EnablePatches();
             InstantiateInstanceControllers();
         }
@@ -52,12 +53,12 @@ namespace RealismCommonLib
             GetFps();
             FPSFactor = GetFPSFactor();
 
-            RealismCommonLib.Utils.CurveDrawer.HandleInput();
+            Utils.CurveDrawer.HandleInput();
         }
 
         void OnGUI()
         {
-            RealismCommonLib.Utils.CurveDrawer.DrawGUI();
+           Utils.CurveDrawer.DrawGUI();
         }
 
         void EnablePatches()
@@ -74,7 +75,7 @@ namespace RealismCommonLib
 
             //Aiming
             new ToggleAimPatch().Enable();
-            new SetAimPatch().Enable();
+            new AimingChangedPatch().Enable();
 
             //Shooting
             new ShootPatch().Enable();
@@ -86,6 +87,9 @@ namespace RealismCommonLib
             new ApplyMotionPatch().Enable();
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
+            new SetTiltPatch().Enable();
+            new EnterMountedStatePatch().Enable();
+            new ExitMountedStatePatch().Enable();
             new InventoryOpenPatch().Enable();
 
             //PWA Patches
