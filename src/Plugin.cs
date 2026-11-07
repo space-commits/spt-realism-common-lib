@@ -16,7 +16,7 @@ namespace RealismCommonLib
     {
         public const string MOD_GUID = "com.fontaine.spt-realism-common-lib";
         public const string MOD_NAME = "Fontaine-SPTRealismCommon-Lib";
-        public const string MOD_VERSION = "0.0.2";
+        public const string MOD_VERSION = "0.0.3";
 
         //common lib's state and controller instances
         public static GameState GameStateInstance;
@@ -88,6 +88,8 @@ namespace RealismCommonLib
             new SetCharacterMovementSpeedPatch().Enable();
             new SetCharacterSprintSpeedPatch().Enable();
             new SetTiltPatch().Enable();
+            new EnterMountedStatePatch().Enable();
+            new ExitMountedStatePatch().Enable();
             new InventoryOpenPatch().Enable();
 
             //PWA Patches

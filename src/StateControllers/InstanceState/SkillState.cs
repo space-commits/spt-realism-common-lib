@@ -41,7 +41,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.Player.Skills.Strength.Level; 
+                return PlayerStateInstance.Player.Skills.Strength.SummaryLevel; 
             }
         }
 
@@ -49,7 +49,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return PlayerStateInstance.Player.Skills.Endurance.Level; 
+                return PlayerStateInstance.Player.Skills.Endurance.SummaryLevel; 
             }
         }
 

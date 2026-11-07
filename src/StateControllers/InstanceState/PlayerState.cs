@@ -63,7 +63,15 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             get
             {
-                return IsSprinting || (Player.ProceduralWeaponAnimation.Mask & EProceduralAnimationMask.Walking) != 0;
+                return IsSprinting || IsWalking;
+            }
+        }
+
+        public bool IsWalking
+        {
+            get
+            {
+                return (Player.ProceduralWeaponAnimation.Mask & EProceduralAnimationMask.Walking) != 0;
             }
         }
 
@@ -145,7 +153,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
             PreviouslyEquippedItemId = null; //ensures on new player instance, weapon swap is detected and events are raised
             PreviouslyEquippedGunId = null; //ensures on new player instance, weapon swap is detected and events are raised
- 
+
             //component will be initialized after events fired, so do initial calc here
             CalcPlayerWeightStats();
 

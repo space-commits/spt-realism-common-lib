@@ -50,9 +50,20 @@ namespace RealismCommonLib.Events
         /// </summary>
         public static event Action<bool>? OnFullLeftLeanChanged;
 
+        /// <summary>
+        /// Fires when the player enters or leaves vanilla weapon mounting (MovementContext.IsInMountedState).
+        /// True = now mounted, false = no longer mounted.
+        /// </summary>
+        public static event Action<bool>? OnMountedStateChanged;
+
         internal static void RaiseOnFullLeftLeanChanged(bool isFullyLeaningLeft)
         {
             BaseEventHandler.RaiseEvent(OnFullLeftLeanChanged, isFullyLeaningLeft);
+        }
+
+        internal static void RaiseOnMountedStateChanged(bool isMounted)
+        {
+            BaseEventHandler.RaiseEvent(OnMountedStateChanged, isMounted);
         }
 
         internal static void RaiseOnInventoryOpened()
