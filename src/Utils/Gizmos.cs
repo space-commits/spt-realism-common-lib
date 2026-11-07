@@ -139,29 +139,34 @@ namespace RealismCommonLib.Utils
                 sphere.transform.SetParent(colliderTransform, true);
             }
 
-            public static void VisualizeBoxCollider(BoxCollider boxCollider, string colliderName)
+            // Creates a collider-less cube matching the box (world size, position, rotation) and parents it to the box's transform,
+            // so it follows the bone and hides/destroys with it. Returns the cube so callers can remove it.
+            public static GameObject VisualizeBoxCollider(BoxCollider boxCollider, string colliderName, Color? color = null)
             {
                 // Create a cube primitive to represent the collider.
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.name = "Gizmo_" + colliderName;
 
-                // Disable the cube's collider component.
-                UnityEngine.Object.Destroy(cube.GetComponent<Collider>());
+                // Remove the cube's collider now, not at end of frame: under a hit-collider (e.g. a plate) a live collider would register hits.
+                UnityEngine.Object.DestroyImmediate(cube.GetComponent<Collider>());
 
-                // Set the cube's position and scale to match the box collider.
+                // Set the cube's position, rotation and world scale to match the box collider.
                 Transform colliderTransform = boxCollider.transform;
                 cube.transform.position = colliderTransform.TransformPoint(boxCollider.center);
-                cube.transform.localScale = Vector3.Scale(colliderTransform.localScale, boxCollider.size) * PluginConfig.test1.Value;
-
-                // Optionally, set the cube's rotation to match the collider's GameObject.
                 cube.transform.rotation = colliderTransform.rotation;
+                cube.transform.localScale = Vector3.Scale(colliderTransform.lossyScale, boxCollider.size);
 
-                // Set a transparent material to the cube, so it doesn't obstruct the view.
-                Material transparentMaterial = new Material(Shader.Find("Transparent/Diffuse"));
-                transparentMaterial.color = GetColor(colliderName); // Red semi-transparent
-                cube.GetComponent<Renderer>().material = transparentMaterial;
+                // Transparent material if the shader is in the build, else opaque Standard, else keep the primitive's default material.
+                Renderer renderer = cube.GetComponent<Renderer>();
+                Shader shader = Shader.Find("Transparent/Diffuse") ?? Shader.Find("Standard");
+                if (shader != null) renderer.material = new Material(shader);
+                renderer.material.color = color ?? GetColor(colliderName);
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows = false;
 
                 // Parent the cube to the collider's GameObject to maintain relative positioning.
                 cube.transform.SetParent(colliderTransform, true);
+                return cube;
             }
 
             public static void VisualizeCapsuleCollider(CapsuleCollider capsuleCollider, string colliderName)
