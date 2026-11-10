@@ -117,6 +117,9 @@ namespace RealismCommonLib
 
             //Weapon
             new WeaponConstructorPatch().Enable();
+
+            //Bots (dev tools)
+            new FreezeBotsPatch().Enable();
         }
 
         void InstantiateInstanceControllers()

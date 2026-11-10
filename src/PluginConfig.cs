@@ -16,6 +16,7 @@ namespace RealismCommonLib
         public static ConfigEntry<bool> EnablePWALogging { get; set; }
         public static ConfigEntry<bool> EnableRecoilLogging { get; set; }
         public static ConfigEntry<bool> EnableBallisticsLogging { get; set; }
+        public static ConfigEntry<bool> FreezeBots { get; set; }
         public static ConfigEntry<float> test1 { get; set; }
         public static ConfigEntry<float> test2 { get; set; }
         public static ConfigEntry<float> test3 { get; set; }
@@ -82,6 +83,7 @@ namespace RealismCommonLib
             AddEffectKeybind = config.Bind(dev, "Add Effect Keybind", new KeyboardShortcut(KeyCode.None), new ConfigDescription("", null, new ConfigurationManagerAttributes { Order = 40, IsAdvanced = true, Browsable = true }));
             ZoneDebug = config.Bind<bool>(dev, "Enable Zone Debug", false, new ConfigDescription("", null, new ConfigurationManagerAttributes { Order = 30, IsAdvanced = true, Browsable = true }));
             DevMode = config.Bind<bool>(dev, "Enable Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes { Order = 29, IsAdvanced = true, Browsable = true }));
+            FreezeBots = config.Bind<bool>(dev, "Freeze Bots", false, new ConfigDescription("Bots that spawn while this is on never activate their AI and stand still where they spawned (same as a bot spawned without a weapon). Bots already active are unaffected. Turning it off lets frozen bots activate.", null, new ConfigurationManagerAttributes { Order = 25, IsAdvanced = true, Browsable = true }));
             EnableBallisticsLogging = config.Bind<bool>(dev, "Enable Ballistics Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 20, IsAdvanced = true, Browsable = true }));
             EnableGeneralLogging = config.Bind<bool>(dev, "Enable General Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
             EnableMedicalLogging = config.Bind<bool>(dev, "Enable Medical Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
