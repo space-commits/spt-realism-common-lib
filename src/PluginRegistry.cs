@@ -5,8 +5,8 @@ namespace RealismCommonLib
     public static class PluginRegistry
     {
         //Mod detection
-        //Lazy: plugins that depend on the common lib aren't in PluginInfos yet during the common lib's Awake.
-        //Don't read these in any plugin's Awake.
+        //Lazy, since plugins that depend on the lib aren't in PluginInfos yet during its Awake.
+        //Don't read these from any plugin's Awake.
         public static bool AttachmentOverhaulEnabled => false; // Chainloader.PluginInfos.ContainsKey("com.fontaine.attachmentoverhaul");
         public static bool MedicalOverhaulEnabled => false; // Chainloader.PluginInfos.ContainsKey("com.fontaine.medicaloverhaul");
         public static bool StanceOverhaulEnabled => Chainloader.PluginInfos.ContainsKey("com.fontaine.spt-stance-overhaul");

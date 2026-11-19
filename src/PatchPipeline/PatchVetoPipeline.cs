@@ -9,7 +9,7 @@ namespace RealismCommonLib.PatchPipeline
         private readonly List<Func<TContext, bool>> _subscribers = new();
 
         /// <summary>
-        /// Return true if you want to prevent the patch from running.
+        /// Return true to stop the patch running.
         /// </summary>
         public IDisposable Register(Func<TContext, bool> subscriber)
         {
@@ -21,7 +21,7 @@ namespace RealismCommonLib.PatchPipeline
         {
             bool veto = false;
 
-            //allow all subs to run logic
+            //no early out, every subscriber still gets to run
             foreach (var sub in _subscribers)
             {
                 if (sub(ctx))

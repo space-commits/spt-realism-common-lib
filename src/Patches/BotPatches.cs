@@ -5,10 +5,9 @@ using System.Reflection;
 
 namespace RealismCommonLib.Patches
 {
-    // Dev tool: keeps bots in EBotState.PreActive, the same state a bot spawned without a firearm is stuck in.
-    // BotOwner.UpdateManual only activates a PreActive bot (method_10: brain, mover, sensors...) once WeaponManager.IsReady,
-    // which only BotWeaponManager.UpdateFirearmsController sets. Skipping UpdateManual while PreActive does the same thing:
-    // the bot body stands where it spawned, has no AI, and still takes hits/damage as a normal Player.
+    // Dev tool: keeps bots stuck in EBotState.PreActive, like a bot that spawns without a gun.
+    // UpdateManual only activates a PreActive bot (brain, mover, sensors...) once WeaponManager.IsReady, so skipping it
+    // leaves a body standing at its spawn with no AI that still takes hits like a normal Player.
     // See Realism/docs/Assembly/Bot-Activation.md.
     public class FreezeBotsPatch : ModulePatch
     {

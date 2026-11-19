@@ -248,9 +248,8 @@ namespace RealismCommonLib.Patches
         }
     }
 
-    //This is actually called second after SetMagTypeCurrent
-    //Reliably called only once so good for entry point
-    //The magazine here will be the one being reloaded to
+    //Runs second, after SetMagTypeCurrent, but only ever once, so it's the reliable entry point.
+    //magazine is the one being reloaded to.
     public class ReloadMagPatch : ModulePatch
     {
         private static FieldInfo _playerField;
@@ -312,9 +311,8 @@ namespace RealismCommonLib.Patches
         }
     }
 
-    //reload speed of current mag
-    //always called first when starting reload, even when reloading from no mag
-    //will be called twice during process, once at start and once after new mag insterted but before OnMagInsertedPatch
+    //Reload speed for the current mag. Always the first call in a reload, even with no mag in.
+    //Runs twice: at the start, and again once the new mag is in but before OnMagInsertedPatch.
     public class SetMagTypeCurrentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -359,8 +357,7 @@ namespace RealismCommonLib.Patches
         }
     }
 
-    //speed of putting mag in weapon
-    //called twice, straight after the last call of this patch
+    //Speed of putting the mag in. Runs twice, straight after the last SetMagTypeCurrent.
     public class SetMagInWeaponPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -381,7 +378,7 @@ namespace RealismCommonLib.Patches
 
                 if (PluginConfig.EnableReloadLogging.Value) Logger.LogWarning("===SetMagInWeapon===");
 
-                ReloadEvents.RaiseOnInsertingNewMag(); // will be called multiple times
+                ReloadEvents.RaiseOnInsertingNewMag(); // fires more than once
                 ReloadStateInstance.MagReloadState = EMagReloadState.InsertingNewMag;
             }
         }
@@ -401,7 +398,7 @@ namespace RealismCommonLib.Patches
         [PatchPostfix]
         private static void PatchPostfix(ref Player.FirearmController __instance)
         {
-            //to find this again, look for private void method_47(){ this.CurrentOperation.OnMagInsertedToWeapon(); }
+            //number changes between versions, it's the one whose body is just CurrentOperation.OnMagInsertedToWeapon()
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer == true)
             {
@@ -486,7 +483,7 @@ namespace RealismCommonLib.Patches
         }
     }
 
-    //Reset reload speed 
+    //EFT resets reload speed here, so grab its base speed and clear the mag reload state
     public class SetSpeedParametersPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()

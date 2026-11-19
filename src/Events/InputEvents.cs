@@ -9,7 +9,7 @@ namespace RealismCommonLib.Events
         public static event Action? ToggleStepOutInput;
 
         /// <summary>
-        /// Player toggled duck or prone
+        /// Crouch or prone toggled.
         /// </summary>
         public static event Action? ChangeStanceInput;
 

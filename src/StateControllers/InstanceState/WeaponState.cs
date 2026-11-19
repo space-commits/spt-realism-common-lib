@@ -22,11 +22,19 @@ namespace RealismCommonLib.StateControllers.InstanceState
         //class
         private bool _isPistol;
         private bool _isShotgun;
-        private bool _treatAsPistol; //is pistol class, or related, and does not have stock     
+        private bool _treatAsPistol; //pistol or machine pistol with no shoulder contact
 
-        //to be used by external callers
         public Action? OnWeaponStateChanged;
         public Action<FirearmController>? OnWeaponStateChangedFc;
+
+        /// <summary>
+        /// Fires when TreatAsPistol flips: a pistol/non-pistol swap, or a pistol gaining or losing shoulder contact.
+        /// Raised after the other weapon state events, so the rest of the state is already up to date.
+        /// </summary>
+        public Action? OnTreatAsPistolChanged;
+
+        // last value sent through OnTreatAsPistolChanged
+        private bool _lastTreatAsPistol;
 
         public Weapon? WeaponInstance
         {
@@ -116,9 +124,9 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        //Custom Stats (requires attachment overhaul or others)
-        //Should this common lib pull data from the modules, or should the modules set these?
-        //Having the lib do it means less code in the modules, but more coupling
+        //Custom stats, these need attachment overhaul or similar to be set.
+        //Not decided yet whether the lib should pull them from the modules or the modules should set them.
+        //Pulling means less module code but more coupling.
 
         public bool IsMachinePistol { get; set; } = false;
 
@@ -131,8 +139,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        //need to find a mod agnostic way to determine this
-        //if shotgunn and firemode is single should work
+        //TODO: find a mod agnostic way to detect this
         public bool IsManuallyOperated
         {
             get
@@ -161,8 +168,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public Weapon.EReloadMode WeaponReloadType { get ; internal set; }
 
-        //this should only return BSG aim speed if attahcment overhaul is not present, but should still be factored by health state
-        //it needs to factor adrenaline, stamina, injury, weapon stats, weapon sight, etc. as calculated previously
+        //TODO: should be BSG's aim speed only without attachment overhaul, and should still factor in
+        //adrenaline, stamina, injuries, weapon stats, sight etc.
         public float TotalFinalAimSpeed
         {
             get
@@ -171,8 +178,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        //this should be just the base weapon aim speed based on ergonomics, not health state or weapon sight
-        //this was calculated differnetly by attachment overhaul, stance speed was balanced around it. If attachment overhaul is present, should set this.
+        //TODO: should be the ergo-based aim speed only, no health or sight. Attachment overhaul calcs this differently
+        //and stance speed is balanced around its value, so it should set this when present.
         public float BaseAimSpeed
         {
             get
@@ -202,15 +209,16 @@ namespace RealismCommonLib.StateControllers.InstanceState
             PWAEvents.OnUpdateWeaponVariablesWithFc += UpdateWeaponStateOnStateChange;
         }
 
-        void Destroy()
+        void OnDestroy()
         {
             PWAEvents.OnUpdateWeaponVariablesWithFc -= UpdateWeaponStateOnStateChange;
         }
 
         private void RaiseOnWeaponStateChanged(FirearmController fc)
         {
-            BaseEventHandler.RaiseEvent(OnWeaponStateChanged);
+            //Fc first: its subscribers work out weapon stats (e.g. effective weight) that the parameterless ones read
             BaseEventHandler.RaiseEvent(OnWeaponStateChangedFc, fc);
+            BaseEventHandler.RaiseEvent(OnWeaponStateChanged);
         }
 
         public void CheckForShoulderContact(Weapon weapon)
@@ -237,8 +245,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
         }
 
         /// <summary>
-        /// When weapon state changes (reload, fold stock, change firemode etc), update relevant weapon state variables.
-        /// Don't use componenet's weapon property as it may be null or not updated when this is called.
+        /// Runs on any weapon state change (reload, stock fold, fire mode etc).
+        /// Use fc here, WeaponInstance can be null or stale at this point.
         /// </summary>
         public void UpdateWeaponStateOnStateChange(FirearmController fc)
         {
@@ -247,22 +255,26 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
             if (!PluginRegistry.AttachmentOverhaulEnabled)
             {
-                //stats
                 TotalErgo = fc.Item.ErgonomicsTotal;
-
-                //state
                 CheckForShoulderContact(fc.Item);
             }
 
-            //this ensures that external callers get triggered after the weapon state is updated, so they can use the updated values
+            //before the events, otherwise subscribers read the previous weapon's class (pistol, shotgun, reload mode)
+            SetWeaponImmutableState(fc);
+
             RaiseOnWeaponStateChanged(fc);
 
-            SetWeaponImmutableState(fc);
+            bool treatAsPistol = TreatAsPistol;
+            if (treatAsPistol != _lastTreatAsPistol)
+            {
+                _lastTreatAsPistol = treatAsPistol;
+                BaseEventHandler.RaiseEvent(OnTreatAsPistolChanged);
+            }
         }
 
         /// <summary>
-        /// For immutable weapon properties.
-        /// Don't use componenet's weapon property as it may be null or not updated when this is called.
+        /// Stuff that never changes for a given weapon (class, reload mode).
+        /// Use fc here, WeaponInstance can be null or stale at this point.
         /// </summary>
         public void SetWeaponImmutableState(FirearmController fc)
         {

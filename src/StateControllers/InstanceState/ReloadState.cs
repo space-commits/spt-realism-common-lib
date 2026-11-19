@@ -93,7 +93,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public void ReloadStateCheck()
         {
-            //IsInReloadOpertation is a potentially expensive check, try to see if it's needed
+            //TODO: IsInReloadOpertation might be expensive, check whether it's needed here
             if (IsInReloadOpertation)
             {
                 InternalReloadStateCheck();

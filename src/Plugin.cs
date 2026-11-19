@@ -16,7 +16,7 @@ namespace RealismCommonLib
     {
         public const string MOD_GUID = "com.fontaine.spt-realism-common-lib";
         public const string MOD_NAME = "Fontaine-SPTRealismCommon-Lib";
-        public const string MOD_VERSION = "0.0.3";
+        public const string MOD_VERSION = "0.0.4";
 
         //common lib's state and controller instances
         public static GameState GameStateInstance;
@@ -82,6 +82,7 @@ namespace RealismCommonLib
 
             //Player
             new OnItemAddedOrRemovedPatch().Enable();
+            new OnWeightUpdatedPatch().Enable();
             new PlayerInitPatch().Enable();
             new ClampedSpeedPatch().Enable();
             new ApplyMotionPatch().Enable();
@@ -124,10 +125,10 @@ namespace RealismCommonLib
 
         void InstantiateInstanceControllers()
         {
-            //global state persists as long as EFT is running.
+            //global state lives for the whole EFT session
             InitGlobalComponents(this.gameObject);
 
-            //this handles adding player-scoped components on player init.
+            //player-scoped components get added on player init
             PlayerEvents.OnPlayerInitRef += InitPlayerComponents;
         }
 

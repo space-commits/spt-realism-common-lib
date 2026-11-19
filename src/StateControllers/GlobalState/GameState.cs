@@ -44,8 +44,7 @@ namespace RealismCommonLib.StateControllers.GlobalState
             return gameWorld.GetAlivePlayerByProfileID(id);
         }
 
-        //TODO: replace with events rather than doing these inefficent checks
-        //may not be reliable enough if not called per frame, may leak exceptions 
+        //TODO: replace this polling with events. Might not be reliable unless it runs every frame, and can leak exceptions.
         public void CheckIsReady()
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;

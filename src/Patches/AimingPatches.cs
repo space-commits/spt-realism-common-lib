@@ -30,9 +30,9 @@ namespace RealismCommonLib.Patches
         }
     }
 
-    // AimingChanged is raised by the IsAiming setter on every change after PWA.IsAiming is updated.
-    // It sees aim being force-cancelled (sprint, jump, inventory, reloads, malfunctions), SetAim(bool) doesn't,
-    // which goes through CurrentOperation.SetAiming/IsAiming directly and never calls SetAim.
+    // The IsAiming setter raises AimingChanged on every change, after PWA.IsAiming is updated.
+    // Patching SetAim(bool) would miss forced cancels (sprint, jump, inventory, reloads, malfs),
+    // since those go through CurrentOperation.SetAiming/IsAiming and never call SetAim.
     public class AimingChangedPatch : ModulePatch
     {
         private static FieldInfo _playerField;

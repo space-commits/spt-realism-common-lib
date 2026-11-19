@@ -47,6 +47,27 @@ namespace RealismCommonLib.Patches
         }
     }
 
+    public class OnWeightUpdatedPatch : ModulePatch
+    {
+        private static FieldInfo _playerField;
+
+        protected override MethodBase GetTargetMethod()
+        {
+            _playerField = AccessTools.Field(typeof(global::Physical), "_player");
+            return AccessTools.Method(typeof(global::Physical), nameof(global::Physical.OnWeightUpdated));
+        }
+
+        [PatchPostfix]
+        private static void PatchPostfix(global::Physical __instance)
+        {
+            Player player = (Player)_playerField.GetValue(__instance);
+            if (player != null && player.IsYourPlayer)
+            {
+                PlayerEvents.RaiseOnWeightUpdated();
+            }
+        }
+    }
+
     public class OnItemAddedOrRemovedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -159,10 +180,9 @@ namespace RealismCommonLib.Patches
     }
 
     /// <summary>
-    /// MovementContext.SetTilt is the single place the player's real tilt is written (clamped to [-5, 5], left is negative).
-    /// The lean key (Player.ToggleLean) requests +-5, the incremental lean (Player.SlowLean) creeps towards it in 0.1 steps,
-    /// and MovementState.SetTilt may reduce the request (e.g. leaning into a wall) before it gets here, so this sees the
-    /// lean that actually happened rather than the input.
+    /// MovementContext.SetTilt is where the real tilt gets written (clamped to [-5, 5], left is negative).
+    /// MovementState.SetTilt can cut the request down first (e.g. leaning into a wall), so this sees the lean that
+    /// actually happened, not the input. Lean key (ToggleLean) asks for +-5, SlowLean creeps there in 0.1 steps.
     /// </summary>
     public class SetTiltPatch : ModulePatch
     {
@@ -184,7 +204,7 @@ namespace RealismCommonLib.Patches
 
             if (!Plugin.PlayerStateInstance.IsFullyLeaningLeft)
             {
-                // Only the lean key counts, an incremental lean that creeps all the way to -5 does not
+                // lean key only, a slow lean that creeps all the way to -5 doesn't count
                 if (!atFullLeftTilt || player.CurrentLeanType != LeanType.NormalLean) return;
 
                 Plugin.PlayerStateInstance.IsFullyLeaningLeft = true;
@@ -192,7 +212,7 @@ namespace RealismCommonLib.Patches
             }
             else if (!atFullLeftTilt)
             {
-                // Anything that moves the tilt off full left ends it: lean key released, lean right, sprint, jump, ...
+                // anything that moves tilt off full left ends it (key released, lean right, sprint, jump...)
                 Plugin.PlayerStateInstance.IsFullyLeaningLeft = false;
                 PlayerEvents.RaiseOnFullLeftLeanChanged(false);
             }
@@ -200,8 +220,8 @@ namespace RealismCommonLib.Patches
     }
 
     /// <summary>
-    /// MovementContext.EnterMountedState is the single entry into vanilla mounting (called by
-    /// WeaponMountingComponent.OnFoundPoint once a point is found), so IsInMountedState is true by the postfix.
+    /// The only way into vanilla mounting (called from WeaponMountingComponent.OnFoundPoint),
+    /// so IsInMountedState is already true in the postfix.
     /// </summary>
     public class EnterMountedStatePatch : ModulePatch
     {
@@ -222,8 +242,8 @@ namespace RealismCommonLib.Patches
     }
 
     /// <summary>
-    /// MovementContext.ExitMountedState returns early when not mounted, and clears the mount point data
-    /// (IsInMountedState) when it does exit, so only a true -> false change is reported.
+    /// Returns early when not mounted and clears IsInMountedState when it does exit,
+    /// so only a true -> false change gets reported.
     /// </summary>
     public class ExitMountedStatePatch : ModulePatch
     {

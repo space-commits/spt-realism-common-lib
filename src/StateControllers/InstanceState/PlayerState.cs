@@ -12,7 +12,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 {
     public static class PlayerConsts
     {
-        //TODO move these to modules, controller should just emit what the stamina % is.
+        //TODO: move these to the modules, the lib should only expose the stamina %
         public const float AIM_MOVE_SPEED_BASE = 0.5f;
 
         public const float REMAINING_ARM_STAM_FACTOR = 0.5f;
@@ -125,7 +125,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
         }
 
         internal MongoID? PreviouslyEquippedItemId { get; set; }
-        internal MongoID? PreviouslyEquippedGunId { get; set; }
+        //instance id, not template id, so two guns of the same model still count as a swap
+        internal string? PreviouslyEquippedGunId { get; set; }
         public float BaseStaminaPerc { get; private set; }
 
         public float RemainingArmStamFactor { get; private set; }
@@ -134,27 +135,33 @@ namespace RealismCommonLib.StateControllers.InstanceState
 
         public float CombinedStaminaFactor { get; private set; }
 
-        //this is just set to current player total weight, so it assumes it's been modified elsewhere by comfort stat
-        //renamed it to reflect above, in future create dedicated property that factors comfort
-        public float TotalWeightMinusWeapon { get; private set; }
+        //weapon is read fresh each time so the old one's weight can't linger after a swap
+        public float TotalWeightMinusWeapon
+        {
+            get
+            {
+                Weapon? weapon = Player != null ? FirearmController?.Item : null;
+                return TotalWeight - (weapon != null ? weapon.TotalWeight : 0f);
+            }
+        }
 
-        //this is just set to current player total weight, so it assumes it's been modified elsewhere by comfort stat
-        //renamed it to reflect above, in future create dedicated property that factors comfort
+        //raw inventory weight, assumes comfort has already been applied elsewhere
+        //TODO: add a property that factors in comfort itself
         public float TotalWeight { get; private set; }
 
-        //this is a config option, probably should be from movement or gear overhaul
-        //probably has a server component, setting gear mouse penalties to 0 as it's basd on weight
-        //may be a redundant feature if doing dead zone instead
+        //TODO: probably belongs in movement or gear overhaul. Likely needs the server to zero gear mouse penalties,
+        //since this is weight based. Might not be needed at all with dead zone.
         public bool EnableMouseSensPenalty { get; private set; }
 
         void Awake()
         {
             IsScav = Singleton<GameWorld>.Instance?.MainPlayer?.Profile?.Info?.Side == EPlayerSide.Savage;
 
-            PreviouslyEquippedItemId = null; //ensures on new player instance, weapon swap is detected and events are raised
-            PreviouslyEquippedGunId = null; //ensures on new player instance, weapon swap is detected and events are raised
+            //so a new player instance always counts as a weapon swap and raises the events
+            PreviouslyEquippedItemId = null;
+            PreviouslyEquippedGunId = null;
 
-            //component will be initialized after events fired, so do initial calc here
+            //the component is added after the init events fire, so do the first calc here
             CalcPlayerWeightStats();
 
             PlayerEvents.OnItemAddedOrRemoved += CalcPlayerWeightStats;
@@ -166,27 +173,45 @@ namespace RealismCommonLib.StateControllers.InstanceState
             if (_staminaCalcTimer.Ready()) CalcStaminaFactors();
         }
 
-        void onDestroy()
+        void LateUpdate()
+        {
+            if (!_hipInaccuracyRefreshRequested) return;
+            _hipInaccuracyRefreshRequested = false;
+
+            if (Player != null)
+                FirearmController?.UpdateHipInaccuracy();
+        }
+
+        private bool _hipInaccuracyRefreshRequested;
+
+        /// <summary>
+        /// Queues one FirearmController.UpdateHipInaccuracy for the end of the frame, on whatever weapon is in hands by then.
+        /// Use this rather than calling it directly, since one stance/aim change or pick-up hits several handlers that all want a refresh.
+        /// </summary>
+        public void RequestHipInaccuracyRefresh()
+        {
+            _hipInaccuracyRefreshRequested = true;
+        }
+
+        void OnDestroy()
         {
             PlayerEvents.OnItemAddedOrRemoved -= CalcPlayerWeightStats;
             PlayerEvents.OnPlayerInit -= CalcPlayerWeightStats;
         }
 
         /// <summary>
-        /// Resets the player's procedural weapon animation state, useful to reset sway.
+        /// Resets the PWA state, handy for killing sway.
         /// </summary>
         public void ResetProceduralState()
         {
             Player.ProceduralWeaponAnimation.OnAimOrPoseChanged();
-            FirearmController?.UpdateHipInaccuracy();
+            RequestHipInaccuracyRefresh();
         }
 
-        //TODO this should not be opionated, should only calculate the raw % stamina
-        //this hould be handled by modules, stances should calculate this itself, common lib just needs to give the raw values or percentages
-        //modules can work out factors based on this.
+        //TODO: shouldn't be opinionated. Just expose the raw stamina %, and let modules (e.g. stances) work out their own factors.
         private void CalcStaminaFactors()
         {
-            if (Player || Player.Physical == null) return;
+            if (Player == null || Player.Physical == null || SkillStateInstance == null) return;
 
             float remainArmStamPercent = Mathf.Min(Player.Physical.HandsStamina.Current / Player.Physical.HandsStamina.TotalCapacity * (1f + SkillStateInstance.StrengthSkillAimBuff), 1f);
             BaseStaminaPerc = Player.Physical.Stamina.Current / Player.Physical.Stamina.TotalCapacity;
@@ -201,15 +226,11 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             if (Player?.Inventory == null) return;
             Player.Inventory.UpdateTotalWeight();
-            float playerWeight = Player.Inventory.TotalWeight;
-            var weapon = Player.HandsController != null && Player?.HandsController?.Item != null ? Player.HandsController.Item as Weapon : null;
-            float weaponWeight = weapon != null ? weapon.TotalWeight : 0f;
-            TotalWeightMinusWeapon = playerWeight - weaponWeight;
-            TotalWeight = playerWeight;
+            TotalWeight = Player.Inventory.TotalWeight;
         }
 
         /// <summary>
-        /// Sets MovementContext.SpeedLimitIsDirty to true, which forces speed limit to update. Do not call in update.
+        /// Forces the speed limit to recalc via MovementContext.SpeedLimitIsDirty. Don't call every frame.
         /// </summary>
         // public void UpdateWalkSpeedLimits()
         // {
