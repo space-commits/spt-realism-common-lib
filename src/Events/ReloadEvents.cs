@@ -7,10 +7,10 @@ namespace RealismCommonLib.Events
 {
     public static class ReloadEvents
     {
-        //if I need priority, can add a dictionary of type int and action, and sort + iterate over it
+        //if priority is ever needed, use an int -> Action dictionary and iterate it sorted
 
         /// <summary>
-        /// Triggered after weapon reload/manipulation animation
+        /// After a reload/manipulation animation finishes.
         /// </summary>
         public static event Action? WeaponStateReset;
 
@@ -19,7 +19,7 @@ namespace RealismCommonLib.Events
         public static event Action? CheckAmmo;
 
         /// <summary>
-        /// Triggered on bolt/pump action usage.
+        /// Bolt or pump cycled.
         /// </summary>
         public static event Action? BoltActionPump;
 
@@ -32,12 +32,12 @@ namespace RealismCommonLib.Events
         public static event Action? QuickMagReload;
 
         /// <summary>
-        /// Will be called multiple times during reload
+        /// Fires more than once per reload.
         /// </summary>
         public static event Action? InsertingNewMag;
 
         /// <summary>
-        /// Will be called multiple times during reload
+        /// Fires more than once per reload.
         /// </summary>
         public static event Action? RemovingCurrentMag;
 

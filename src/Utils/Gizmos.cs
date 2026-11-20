@@ -45,12 +45,10 @@ namespace RealismCommonLib.Utils
                 var lineObject = new GameObject();
                 var lineRenderer = lineObject.AddComponent<LineRenderer>();
 
-                // Set the color and width of the line
                 lineRenderer.material.color = color;
                 lineRenderer.startWidth = lineWidth;
                 lineRenderer.endWidth = taperLine ? lineWidth / 4f : lineWidth;
 
-                // Set the start and end points of the line
                 lineRenderer.SetPosition(0, startPoint);
                 lineRenderer.SetPosition(1, endPoint);
 
@@ -72,12 +70,10 @@ namespace RealismCommonLib.Utils
                 var rayObject = new GameObject();
                 var lineRenderer = rayObject.AddComponent<LineRenderer>();
 
-                // Set the color and width of the line
                 lineRenderer.material.color = color;
                 lineRenderer.startWidth = lineWidth;
                 lineRenderer.endWidth = taperLine ? lineWidth / 4f : lineWidth;
 
-                // Set the start and end points of the line to draw a rays
                 lineRenderer.SetPosition(0, startPoint);
                 lineRenderer.SetPosition(1, startPoint + direction.normalized * length);
 
@@ -112,51 +108,40 @@ namespace RealismCommonLib.Utils
 
             public static void VisualizeSphereCollider(SphereCollider sphereCollider, string colliderName)
             {
-                // Create a sphere primitive to represent the collider.
-                // Create a sphere primitive to represent the collider.
                 GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-
-                // Disable the sphere's collider component.
                 UnityEngine.Object.Destroy(sphere.GetComponent<Collider>());
 
-                // Set the sphere's position to match the sphere collider.
                 Transform colliderTransform = sphereCollider.transform;
                 sphere.transform.position = colliderTransform.TransformPoint(sphereCollider.center);
 
-                // Calculate the correct scale for the sphere. Unity's default sphere has a radius of 0.5 units.
+                // Unity's default sphere has a radius of 0.5
                 float actualScale = sphereCollider.radius / 0.5f;
                 Vector3 scale = new Vector3(actualScale, actualScale, actualScale);
-
-                // Apply global scale and additional scale factor if needed.
                 sphere.transform.localScale = Vector3.Scale(colliderTransform.localScale, scale) * PluginConfig.test1.Value;
 
-                // Set a transparent material to the sphere, so it doesn't obstruct the view.
                 Material transparentMaterial = new Material(Shader.Find("Standard"));
-                transparentMaterial.color = GetColor(colliderName); // Set to desired semi-transparent color
+                transparentMaterial.color = GetColor(colliderName);
                 sphere.GetComponent<Renderer>().material = transparentMaterial;
 
-                // Parent the sphere to the collider's GameObject to maintain relative positioning.
                 sphere.transform.SetParent(colliderTransform, true);
             }
 
-            // Creates a collider-less cube matching the box (world size, position, rotation) and parents it to the box's transform,
-            // so it follows the bone and hides/destroys with it. Returns the cube so callers can remove it.
+            // Parented to the box so it follows the bone and gets hidden/destroyed with it.
+            // Returned so the caller can remove it.
             public static GameObject VisualizeBoxCollider(BoxCollider boxCollider, string colliderName, Color? color = null)
             {
-                // Create a cube primitive to represent the collider.
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.name = "Gizmo_" + colliderName;
 
-                // Remove the cube's collider now, not at end of frame: under a hit-collider (e.g. a plate) a live collider would register hits.
+                // Has to go now, not at end of frame. Under a hit collider (e.g. a plate) it would still register hits.
                 UnityEngine.Object.DestroyImmediate(cube.GetComponent<Collider>());
 
-                // Set the cube's position, rotation and world scale to match the box collider.
                 Transform colliderTransform = boxCollider.transform;
                 cube.transform.position = colliderTransform.TransformPoint(boxCollider.center);
                 cube.transform.rotation = colliderTransform.rotation;
                 cube.transform.localScale = Vector3.Scale(colliderTransform.lossyScale, boxCollider.size);
 
-                // Transparent material if the shader is in the build, else opaque Standard, else keep the primitive's default material.
+                // Transparent/Diffuse isn't always in the build, so fall back to Standard (opaque)
                 Renderer renderer = cube.GetComponent<Renderer>();
                 Shader shader = Shader.Find("Transparent/Diffuse") ?? Shader.Find("Standard");
                 if (shader != null) renderer.material = new Material(shader);
@@ -164,57 +149,48 @@ namespace RealismCommonLib.Utils
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderer.receiveShadows = false;
 
-                // Parent the cube to the collider's GameObject to maintain relative positioning.
                 cube.transform.SetParent(colliderTransform, true);
                 return cube;
             }
 
             public static void VisualizeCapsuleCollider(CapsuleCollider capsuleCollider, string colliderName)
             {
-                // Create a capsule primitive to represent the collider.
                 GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-
-                // Disable the capsule's collider component.
                 UnityEngine.Object.Destroy(capsule.GetComponent<Collider>());
 
-                // Set the capsule's position to match the capsule collider.
                 Transform colliderTransform = capsuleCollider.transform;
                 capsule.transform.position = colliderTransform.TransformPoint(capsuleCollider.center);
 
-                // Calculate the correct scale for the capsule.
-                float capsuleDefaultHeight = 2.0f; // Default Unity capsule height
-                float capsuleDefaultRadius = 0.5f; // Default Unity capsule radius
+                // Unity's default capsule size
+                float capsuleDefaultHeight = 2.0f;
+                float capsuleDefaultRadius = 0.5f;
                 float actualScaleHeight = (capsuleCollider.height - 2 * capsuleCollider.radius) / capsuleDefaultHeight;
                 float actualScaleRadius = capsuleCollider.radius / capsuleDefaultRadius;
 
-                // Adjust the scale and rotation based on the collider's direction.
                 Vector3 scale = Vector3.one;
                 Quaternion rotation = Quaternion.identity;
                 switch (capsuleCollider.direction)
                 {
                     case 0: // x-axis
                         scale = new Vector3(actualScaleHeight, actualScaleRadius, actualScaleRadius);
-                        rotation = Quaternion.Euler(0, 0, 90); // Rotate to align with x-axis
+                        rotation = Quaternion.Euler(0, 0, 90);
                         break;
                     case 1: // y-axis
                         scale = new Vector3(actualScaleRadius, actualScaleHeight, actualScaleRadius);
                         break;
                     case 2: // z-axis
                         scale = new Vector3(actualScaleRadius, actualScaleRadius, actualScaleHeight);
-                        rotation = Quaternion.Euler(90, 0, 0); // Rotate to align with z-axis
+                        rotation = Quaternion.Euler(90, 0, 0);
                         break;
                 }
 
-                // Apply the rotation and scale.
                 capsule.transform.rotation = colliderTransform.rotation * rotation;
                 capsule.transform.localScale = Vector3.Scale(colliderTransform.localScale, scale) * PluginConfig.test2.Value;
 
-                // Set a transparent material to the capsule, so it doesn't obstruct the view.
                 Material transparentMaterial = new Material(Shader.Find("Transparent/Diffuse"));
-                transparentMaterial.color = GetColor(colliderName); // Red semi-transparent
+                transparentMaterial.color = GetColor(colliderName);
                 capsule.GetComponent<Renderer>().material = transparentMaterial;
 
-                // Parent the capsule to the collider's GameObject to maintain relative positioning.
                 capsule.transform.SetParent(colliderTransform, true);
             }
         }
@@ -371,28 +347,20 @@ namespace RealismCommonLib.Utils
         public class Components
         {
             /// <summary>
-            /// Creates a line between two game objects and adds a script to update the line's DrawPosition and color every frame.
+            /// Line between two objects that keeps following them every frame.
             /// </summary>
-            /// <param name="startObject">The starting game object.</param>
-            /// <param name="endObject">The ending game object.</param>
-            /// <param name="lineWidth">The width of the line.</param>
-            /// <param name="color">The color of the line.</param>
-            /// <returns>The game object containing the line renderer.</returns>
             public static GameObject FollowLine(GameObject startObject, GameObject endObject, float lineWidth, Color color)
             {
                 var lineObject = new GameObject();
                 var lineRenderer = lineObject.AddComponent<LineRenderer>();
 
-                // Set the color and width of the line
                 lineRenderer.material.color = color;
                 lineRenderer.startWidth = lineWidth;
                 lineRenderer.endWidth = lineWidth;
 
-                // Set the initial start and end points of the line
                 lineRenderer.SetPosition(0, startObject.transform.position);
                 lineRenderer.SetPosition(1, endObject.transform.position);
 
-                // AddorUpdateColorScheme a script to update the line's DrawPosition and color every frame
                 var followLineScript = lineObject.AddComponent<FollowLineScript>();
                 followLineScript.startObject = startObject;
                 followLineScript.endObject = endObject;
@@ -414,10 +382,6 @@ namespace RealismCommonLib.Utils
                     lineRenderer.SetPosition(1, endObject.transform.position + new Vector3(0, yOffset, 0));
                 }
 
-                /// <summary>
-                /// Sets the color of the line renderer material.
-                /// </summary>
-                /// <param name="color">The color to set.</param>
                 public void SetColor(Color color)
                 {
                     lineRenderer.material.color = color;
@@ -427,16 +391,9 @@ namespace RealismCommonLib.Utils
 
         internal class TempCoroutine : MonoBehaviour
         {
-            /// <summary>
-            /// Class to run coroutines on a MonoBehaviour.
-            /// </summary>
+            // throwaway host for the destroy coroutine, a static method can't start one itself
             internal class TempCoroutineRunner : MonoBehaviour { }
 
-            /// <summary>
-            /// Destroys the specified GameObject after a given delay.
-            /// </summary>
-            /// <param name="obj">The GameObject to be destroyed.</param>
-            /// <param name="delay">The delay before the GameObject is destroyed.</param>
             public static void DestroyAfterDelay(GameObject obj, float delay)
             {
                 if (obj != null)
@@ -446,12 +403,6 @@ namespace RealismCommonLib.Utils
                 }
             }
 
-            /// <summary>
-            /// Runs a coroutine to destroy a GameObject after a delay.
-            /// </summary>
-            /// <param name="obj">The GameObject to destroy.</param>
-            /// <param name="delay">The delay before destroying the GameObject.</param>
-            /// <returns>The coroutine.</returns>
             private static IEnumerator RunDestroyAfterDelay(GameObject obj, float delay)
             {
                 yield return new WaitForSeconds(delay);

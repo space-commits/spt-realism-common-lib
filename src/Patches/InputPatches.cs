@@ -34,7 +34,7 @@ namespace RealismCommonLib.Patches
             ECommand.ToggleShooting
         };
 
-        //for commands that aren't going to be vetoed, and need to game's logic to run before raising event.
+        //commands that won't be vetoed and need the game's logic to run before the event is raised
         public static ECommand[] Input1PostfixCommands = new ECommand[]
         {
         };
@@ -100,13 +100,13 @@ namespace RealismCommonLib.Patches
         {
             var inputCtx = new InputContext(command);
 
-            //Don't allow input to do anything at all
+            //vetoed input does nothing at all, not even raise events
             if (Pipelines.InputVetoPipeline.ShouldVeto(inputCtx))
                 return false;
 
             RaiseEvents(command);
 
-            //From user POV original input ran above, but the executed logic is overriden
+            //as far as listeners know the input went through, but our logic runs instead of the game's
             if (Pipelines.InputOverridePipeline.ShouldOverride(inputCtx))
             {
                 Pipelines.InputOverrideHandler.RunOverrides(inputCtx);
@@ -133,7 +133,7 @@ namespace RealismCommonLib.Patches
             return true;
         }
 
-        //for raising events after game logic runs
+        //raises events after the game logic, for Input1PostfixCommands
         // [PatchPostfix]
         // private static void PatchPostfix(ECommand command)
         // {
@@ -161,8 +161,8 @@ namespace RealismCommonLib.Patches
 
 
     /// <summary>
-    /// Patch to detect when the player toggles NVG on or off. Internally it's an asynchronous call when toggling head device,
-    /// so need to use these patches to know that they were actually toggled.
+    /// Head device toggles are async, so the toggle sound is the reliable sign the NVG actually switched.
+    /// Same idea for the thermal and face shield patches below.
     /// </summary>
     public class NVGTogglePatch : ModulePatch
     {
@@ -231,12 +231,13 @@ namespace RealismCommonLib.Patches
 
             Item? newItem = value?.Item;
             if (newItem == null) return;
-            
+
             PlayerEvents.RaiseOnAnyItemEquipped();
 
             if (newItem is Weapon weapon)
             {
-                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null && weapon.TemplateId != Plugin.PlayerStateInstance.PreviouslyEquippedGunId)
+                //item id, not template id: two guns of the same model are still a swap
+                if (Plugin.PlayerStateInstance.PreviouslyEquippedGunId != null && weapon.Id != Plugin.PlayerStateInstance.PreviouslyEquippedGunId)
                 {
                     PlayerEvents.RaiseOnWeaponSwap();
                 }
@@ -247,7 +248,7 @@ namespace RealismCommonLib.Patches
 
                 PlayerEvents.RaiseEquippedWeapon();
 
-                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = weapon.TemplateId;
+                Plugin.PlayerStateInstance.PreviouslyEquippedGunId = weapon.Id;
                 Plugin.PlayerStateInstance.PreviouslyEquippedItemId = null;
             }
             else
@@ -262,6 +263,16 @@ namespace RealismCommonLib.Patches
                 Plugin.PlayerStateInstance.PreviouslyEquippedGunId = null;
                 Plugin.PlayerStateInstance.PreviouslyEquippedItemId = newItem?.TemplateId;
             }
+        }
+
+        // The prefix events run before the new controller is assigned, when HandsController is still null
+        // (the old one is already dropped). This runs after, for anything that needs the new controller.
+        [PatchPostfix]
+        private static void Postfix(Player __instance, Player.AbstractHandsController value)
+        {
+            if (!__instance.IsYourPlayer || value?.Item == null) return;
+
+            PlayerEvents.RaiseOnHandsControllerAssigned();
         }
     }
 }

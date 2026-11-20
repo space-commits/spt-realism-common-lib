@@ -8,12 +8,12 @@ namespace RealismCommonLib.Events
     public static class PlayerEvents
     {
         /// <summary>
-        /// Fires when the player is initialized, providing the Player instance as an argument.
+        /// Player init, with the Player passed in.
         /// </summary>
         public static event Action<Player>? OnPlayerInitRef;
 
         /// <summary>
-        /// Fires when the player is initialized, does not pass Palyer instance.
+        /// Player init, without the Player.
         /// </summary>
         public static event Action? OnPlayerInit;
 
@@ -26,11 +26,27 @@ namespace RealismCommonLib.Events
         public static event Action? ToggleHeadDevice;
 
         /// <summary>
-        /// Includes weapons
+        /// Weapons included.
         /// </summary>
         public static event Action? OnAnyItemEquipped;
 
+        /// <summary>
+        /// Raised just before Player.HandsController is assigned. PWA and WeaponState already have the new weapon,
+        /// but HandsController (and PlayerState.FirearmController) is still the old one.
+        /// Use OnHandsControllerAssigned if you need the new controller.
+        /// </summary>
         public static event Action? OnWeaponEquipped;
+
+        /// <summary>
+        /// Raised just after Player.HandsController is assigned, for any item not just weapons.
+        /// PlayerState.FirearmController is the new controller by now.
+        /// </summary>
+        public static event Action? OnHandsControllerAssigned;
+
+        internal static void RaiseOnHandsControllerAssigned()
+        {
+            BaseEventHandler.RaiseEvent(OnHandsControllerAssigned);
+        }
 
         public static event Action? OnWeaponSwap;
 
@@ -45,16 +61,26 @@ namespace RealismCommonLib.Events
         public static event Action? OnInventoryClosed;
 
         /// <summary>
-        /// Fires when the player's actual tilt reaches or leaves a full left lean (the lean key, not the
-        /// incremental lean). True = now fully leaning left, false = no longer fully leaning left.
+        /// The actual tilt reached or left a full left lean (lean key only, not the incremental lean).
+        /// True = now fully leaning left.
         /// </summary>
         public static event Action<bool>? OnFullLeftLeanChanged;
 
         /// <summary>
-        /// Fires when the player enters or leaves vanilla weapon mounting (MovementContext.IsInMountedState).
-        /// True = now mounted, false = no longer mounted.
+        /// Entered or left vanilla weapon mounting (MovementContext.IsInMountedState). True = now mounted.
         /// </summary>
         public static event Action<bool>? OnMountedStateChanged;
+
+        /// <summary>
+        /// After EFT recalcs carry weight (Physical.OnWeightUpdated). EFT overwrites inertia, SprintAcceleration
+        /// and PreSprintAcceleration there, so anything we write into those has to be re-applied.
+        /// </summary>
+        public static event Action? OnWeightUpdated;
+
+        internal static void RaiseOnWeightUpdated()
+        {
+            BaseEventHandler.RaiseEvent(OnWeightUpdated);
+        }
 
         internal static void RaiseOnFullLeftLeanChanged(bool isFullyLeaningLeft)
         {

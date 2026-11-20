@@ -124,7 +124,7 @@ namespace RealismCommonLib.Utils
         private static CurveAxis SelectedAxis = CurveAxis.X;
         private static int SelectedKeyIndex = -1;
 
-        // string buffers (fix input issues)
+        // text field buffers, typing straight into the floats breaks input
         private static string TimeStr = "0";
         private static string ValueStr = "0";
         private static string InTanStr = "0";

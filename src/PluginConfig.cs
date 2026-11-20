@@ -16,6 +16,7 @@ namespace RealismCommonLib
         public static ConfigEntry<bool> EnablePWALogging { get; set; }
         public static ConfigEntry<bool> EnableRecoilLogging { get; set; }
         public static ConfigEntry<bool> EnableBallisticsLogging { get; set; }
+        public static ConfigEntry<bool> FreezeBots { get; set; }
         public static ConfigEntry<float> test1 { get; set; }
         public static ConfigEntry<float> test2 { get; set; }
         public static ConfigEntry<float> test3 { get; set; }
@@ -82,13 +83,13 @@ namespace RealismCommonLib
             AddEffectKeybind = config.Bind(dev, "Add Effect Keybind", new KeyboardShortcut(KeyCode.None), new ConfigDescription("", null, new ConfigurationManagerAttributes { Order = 40, IsAdvanced = true, Browsable = true }));
             ZoneDebug = config.Bind<bool>(dev, "Enable Zone Debug", false, new ConfigDescription("", null, new ConfigurationManagerAttributes { Order = 30, IsAdvanced = true, Browsable = true }));
             DevMode = config.Bind<bool>(dev, "Enable Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes { Order = 29, IsAdvanced = true, Browsable = true }));
+            FreezeBots = config.Bind<bool>(dev, "Freeze Bots", false, new ConfigDescription("Bots that spawn while this is on never activate their AI and stand still where they spawned (same as a bot spawned without a weapon). Bots already active are unaffected. Turning it off lets frozen bots activate.", null, new ConfigurationManagerAttributes { Order = 25, IsAdvanced = true, Browsable = true }));
             EnableBallisticsLogging = config.Bind<bool>(dev, "Enable Ballistics Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 20, IsAdvanced = true, Browsable = true }));
             EnableGeneralLogging = config.Bind<bool>(dev, "Enable General Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
             EnableMedicalLogging = config.Bind<bool>(dev, "Enable Medical Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
             EnableReloadLogging = config.Bind<bool>(dev, "Enable Reload Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
             EnablePWALogging = config.Bind<bool>(dev, "Enable PWA Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
             EnableRecoilLogging = config.Bind<bool>(dev, "Enable Recoil Logging", false, new ConfigDescription("Enables Logging For Debug And Dev", null, new ConfigurationManagerAttributes { Order = 10, IsAdvanced = true, Browsable = true }));
-
             FiringResetDelay = config.Bind<float>(firingState, "Firing Reset Delay", 0.14f, new ConfigDescription("The Time In Seconds That Has To Be Elapsed Before Firing Is Considered Over, Used By Different Modules To Time Resets Related To Firing,", new AcceptableValueRange<float>(-0.1f, 0.5f), new ConfigurationManagerAttributes { IsAdvanced = true, Order = 4 }));
             FiringDeafenResetDelay = config.Bind<float>(firingState, "Firing Deafen Reset Delay", 1f, new ConfigDescription("The Time In Seconds That Has To Be Elapsed Before Firing Is Considered Over, Used By Different Modules To Time Resets Related To Firing,", new AcceptableValueRange<float>(-0.1f, 0.5f), new ConfigurationManagerAttributes { IsAdvanced = true, Order = 4 }));
             FiringVisualResetDelay = config.Bind<float>(firingState, "Firing Visual Recoil Reset Delay", 0.12f, new ConfigDescription("The Time In Seconds That Has To Be Elapsed Before Firing Is Considered Over, Used By Different Modules To Time Resets Related To Firing,", new AcceptableValueRange<float>(-0.1f, 0.5f), new ConfigurationManagerAttributes { IsAdvanced = true, Order = 4 }));
@@ -121,7 +122,7 @@ namespace RealismCommonLib
 
         public static void InitTempBindings(ConfigFile config)
         {
-            ToggleCurveEditorKey = config.Bind("Curve Builder", "Toggle Editor Key", new KeyboardShortcut(KeyCode.F6), "Toggle in-game curve editor");
+            ToggleCurveEditorKey = config.Bind("Curve Builder", "Toggle Editor Key", new KeyboardShortcut(KeyCode.None), "Toggle in-game curve editor");
             CurveFilePath = config.Bind("Curve Builder", "Curve Filepath", "", "Leave blank to save and load curves in plugin folder");
         }
     }

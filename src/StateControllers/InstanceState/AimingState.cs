@@ -11,7 +11,7 @@ namespace RealismCommonLib.StateControllers.InstanceState
 {
     public class AimingState : MonoBehaviour
     {
-        // The aim state last reported through PlayerEvents.AimStateChanged
+        // last value sent through PlayerEvents.AimStateChanged
         private bool _lastReportedAiming;
 
         public bool PlayerCanAim
@@ -30,8 +30,8 @@ namespace RealismCommonLib.StateControllers.InstanceState
             }
         }
 
-        // Self-heal: AimingChangedPatch should report every change, but if one slips past it (a path that bypasses
-        // AimingChanged), report it here so listeners caching the aim state don't stay stuck on a stale value.
+        // Backup for AimingChangedPatch, in case something changes aim without going through AimingChanged.
+        // Stops listeners that cache the aim state getting stuck on a stale value.
         void Update()
         {
             if (PlayerStateInstance?.PWA == null) return;

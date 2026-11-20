@@ -26,7 +26,7 @@ namespace RealismCommonLib.ModifierHandlers
         }
 
         /// <summary>
-        /// Returns false if any handle disallows.
+        /// False if any handle disallows.
         /// </summary>
         public bool Evaluate(bool baseValue = true)
         {
