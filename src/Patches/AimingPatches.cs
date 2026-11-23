@@ -30,7 +30,8 @@ namespace RealismCommonLib.Patches
         }
     }
 
-    // The IsAiming setter raises AimingChanged on every change, after PWA.IsAiming is updated.
+    // The IsAiming setter raises AimingChanged on every change. Firearms update PWA.IsAiming first,
+    // usable items (rangefinder) after, which ReportAimState handles.
     // Patching SetAim(bool) would miss forced cancels (sprint, jump, inventory, reloads, malfs),
     // since those go through CurrentOperation.SetAiming/IsAiming and never call SetAim.
     public class AimingChangedPatch : ModulePatch

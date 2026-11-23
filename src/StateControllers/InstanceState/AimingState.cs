@@ -45,6 +45,10 @@ namespace RealismCommonLib.StateControllers.InstanceState
         {
             if (isAiming == _lastReportedAiming) return;
 
+            // Usable items (rangefinder) raise AimingChanged before updating PWA, and listeners read PWA.
+            // Wait for PWA to catch up, Update() reports it next frame.
+            if (PlayerStateInstance?.PWA == null || isAiming != IsAiming) return;
+
             _lastReportedAiming = isAiming;
             PlayerEvents.RaiseOnAimStateChanged();
         }

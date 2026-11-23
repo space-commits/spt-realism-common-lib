@@ -419,12 +419,24 @@ namespace RealismCommonLib.Patches
             return typeof(Player.FirearmController).GetMethod("ReloadCylinderMagazine", BindingFlags.Instance | BindingFlags.Public);
         }
 
+        // Checked before EFT runs, as once a reload starts the op is no longer Idling.
+        // Idling refuses a full cylinder (unless quick reload) without leaving Idling, so no reset would ever follow.
+        [PatchPrefix]
+        private static void PatchPrefix(Player.FirearmController __instance, bool quickReload, out bool __state)
+        {
+            var mag = __instance.Item.GetCurrentMagazine();
+            bool idleAndFull = __instance.CurrentOperation is Player.FirearmController.Idling && mag != null && !quickReload && mag.Count >= mag.MaxCount;
+            __state = !__instance.Blindfire && mag != null && !idleAndFull;
+        }
+
         [PatchPostfix]
-        private static void PatchPostfix(Player.FirearmController __instance)
+        private static void PatchPostfix(Player.FirearmController __instance, bool __state)
         {
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer == true)
             {
+                if (!__state) return;
+
                 ReloadStateInstance.IsAttemptingToReloadInternalMag = true;
                 ReloadStateInstance.IsAttemptingRevolverReload = true;
 
@@ -445,12 +457,24 @@ namespace RealismCommonLib.Patches
             return typeof(Player.FirearmController).GetMethod("ReloadWithAmmo", BindingFlags.Instance | BindingFlags.Public);
         }
 
+        // Checked before EFT runs, as once a reload starts the op is no longer Idling.
+        // Idling refuses a full tube without leaving Idling, so no reset would ever follow.
+        [PatchPrefix]
+        private static void PatchPrefix(Player.FirearmController __instance, out bool __state)
+        {
+            var mag = __instance.Item.GetCurrentMagazine();
+            bool idleAndFull = __instance.CurrentOperation is Player.FirearmController.Idling && mag != null && mag.Count >= mag.MaxCount;
+            __state = !__instance.Blindfire && mag != null && !idleAndFull;
+        }
+
         [PatchPostfix]
-        private static void PatchPostfix(Player.FirearmController __instance)
+        private static void PatchPostfix(Player.FirearmController __instance, bool __state)
         {
             Player player = (Player)_playerField.GetValue(__instance);
             if (player.IsYourPlayer == true)
             {
+                if (!__state) return;
+
                 ReloadStateInstance.IsAttemptingToReloadInternalMag = true;
 
                 ReloadEvents.RaiseOnInternalMagReload();
